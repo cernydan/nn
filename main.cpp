@@ -26,6 +26,9 @@ auto start = high_resolution_clock::now();
     }
     mlp.count_cost();
     std::cout<<"\n\n"<<mlp.cost;
+
+
+    //hhhh
     
     // Matice q;
     // q.load_stdvv({{0.1,0.2,0.3},{0.2,0.3,0.4},{0.3,0.4,0.5},{0.4,0.5,0.6},{0.5,0.6,0.7}});
