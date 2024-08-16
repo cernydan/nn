@@ -5,9 +5,10 @@
 #include <stdexcept>
 #include <iostream>
 
+template<typename T>  // šablona pro třídu s libovolným datovým typem - dosazení za T
 class Matice {
 public:
-    double** dta;
+    T** dta;
     size_t rows;
     size_t cols;
 
@@ -19,16 +20,22 @@ public:
     Matice& operator=(const Matice& other);    // Kopírovací přiřazovací operátor
     Matice& operator=(Matice&& other) noexcept;    // Move přiřazovací operátor
 
+        // Accessors - přístup k prvkům indexy
+    T& operator()(size_t row, size_t col);           // & adresa prvku - umožňuje změnu/zápis
+    T operator()(size_t row, size_t col) const;     // const - jen čtení
+    
     size_t getRows();
     size_t getCols();
-    double getElement(size_t row, size_t col);
+    T getElement(size_t row, size_t col);
 
-    void setElement(size_t row, size_t col, double value);
-    void load_stdvv(const std::vector<std::vector<double>>& input);    // Načtení dat z std::vector<std::vector<double>>
+    void setElement(size_t row, size_t col, T value);
+    void load_stdvv(const std::vector<std::vector<T>>& input);    // Načtení dat z std::vector<std::vector<double>>
     void printMat();
 
-    double& operator()(size_t row, size_t col);
+    
 };
+
+#include "matice.tpp" // U templatu include tady
 
 #endif // MATICE_H
 

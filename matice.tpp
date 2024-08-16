@@ -1,39 +1,43 @@
 #include "matice.h"
-#include <iostream>
-#include <algorithm>
 
-using namespace std;
-
-Matice::Matice() :     // Konstruktor bez rozměrů
+template<typename T>
+Matice<T>::Matice() :     // Konstruktor bez rozměrů
     dta(nullptr), 
     rows(0), 
     cols(0) {}
 
-Matice::Matice(size_t rows, size_t cols) :     // Konstruktor s rozměry
+template<typename T>
+Matice<T>::Matice(size_t rows, size_t cols) :     // Konstruktor s rozměry
     rows(rows), 
     cols(cols) {
-    dta = new double*[rows];
+    dta = new T*[rows];
     for (size_t i = 0; i < rows; ++i) {
-        dta[i] = new double[cols]();
+        dta[i] = new T[cols]();
     }
 }
 
-Matice::~Matice() {        // Destruktor
+template<typename T>
+Matice<T>::~Matice() {        // Destruktor
 
+    for (size_t i = 0; i < rows; ++i) {
+        delete[] dta[i];
+    }
     delete[] dta;
 }
 
-Matice::Matice(const Matice& other) :         // Kopírovací konstruktor
+template<typename T>
+Matice<T>::Matice(const Matice& other) :         // Kopírovací konstruktor
     rows(other.rows), 
     cols(other.cols) {
-    dta = new double*[rows];
+    dta = new T*[rows];
     for (size_t i = 0; i < rows; ++i) {
-        dta[i] = new double[cols];
+        dta[i] = new T[cols];
         std::copy(other.dta[i], other.dta[i] + cols, dta[i]);
     }
 }
 
-Matice::Matice(Matice&& other) noexcept :     // Move konstruktor
+template<typename T>
+Matice<T>::Matice(Matice&& other) noexcept :     // Move konstruktor
     dta(other.dta), 
     rows(other.rows), 
     cols(other.cols) {
@@ -42,23 +46,31 @@ Matice::Matice(Matice&& other) noexcept :     // Move konstruktor
     other.cols = 0;
 }
 
-Matice& Matice::operator=(const Matice& other) {    // Kopírovací přiřazovací operátor
+template<typename T>
+Matice<T>& Matice<T>::operator=(const Matice& other) {    // Kopírovací přiřazovací operátor
     if (this != &other) {
+        for (size_t i = 0; i < rows; ++i) {
+            delete[] dta[i];
+        }
         delete[] dta;
 
         rows = other.rows;
         cols = other.cols;
-        dta = new double*[rows];
+        dta = new T*[rows];
         for (size_t i = 0; i < rows; ++i) {
-            dta[i] = new double[cols];
+            dta[i] = new T[cols];
             std::copy(other.dta[i], other.dta[i] + cols, dta[i]);
         }
     }
     return *this;
 }
 
-Matice& Matice::operator=(Matice&& other) noexcept {    // Move přiřazovací operátor
+template<typename T>
+Matice<T>& Matice<T>::operator=(Matice&& other) noexcept {    // Move přiřazovací operátor
     if (this != &other) {
+        for (size_t i = 0; i < rows; ++i) {
+            delete[] dta[i];
+        }
         delete[] dta;
 
         dta = other.dta;
@@ -72,15 +84,16 @@ Matice& Matice::operator=(Matice&& other) noexcept {    // Move přiřazovací o
     return *this;
 }
 
-void Matice::load_stdvv(const std::vector<std::vector<double>>& input) {
+template<typename T>
+void Matice<T>::load_stdvv(const std::vector<std::vector<T>>& input) {
     if (!input.empty()) {
         rows = input.size();
         cols = input[0].size();
         delete[] dta;
 
-        dta = new double*[rows];
+        dta = new T*[rows];
         for (size_t i = 0; i < rows; ++i) {
-            dta[i] = new double[cols];
+            dta[i] = new T[cols];
             if (input[i].size() != cols) {
                 std::cout<<"rozmery vstupu neodpovidaji matici";
                 exit(0);
@@ -90,15 +103,18 @@ void Matice::load_stdvv(const std::vector<std::vector<double>>& input) {
     }
 }
 
-size_t Matice::getRows() {
+template<typename T>
+size_t Matice<T>::getRows() {
     return rows;
 }
 
-size_t Matice::getCols() {
+template<typename T>
+size_t Matice<T>::getCols() {
     return cols;
 }
 
-double Matice::getElement(size_t row, size_t col) {
+template<typename T>
+T Matice<T>::getElement(size_t row, size_t col) {
     if (row >= rows || col >= cols) {
         std::cout<<"index mimo rozmery matice";
         exit(0);
@@ -106,7 +122,8 @@ double Matice::getElement(size_t row, size_t col) {
     return dta[row][col];
 }
 
-void Matice::setElement(size_t row, size_t col, double value) {
+template<typename T>
+void Matice<T>::setElement(size_t row, size_t col, T value) {
     if (row >= rows || col >= cols) {
         std::cout<<"index mimo rozmery matice";
         exit(0);
@@ -114,7 +131,8 @@ void Matice::setElement(size_t row, size_t col, double value) {
     dta[row][col] = value;
 }
 
-void Matice::printMat() {
+template<typename T>
+void Matice<T>::printMat() {
     for (size_t i = 0; i < rows; ++i) {
         for (size_t j = 0; j < cols; ++j) {
             std::cout << getElement(i, j) << " ";
@@ -123,7 +141,17 @@ void Matice::printMat() {
     }
 }
 
-double& Matice::operator()(size_t row, size_t col) {
+template<typename T>
+T& Matice<T>::operator()(size_t row, size_t col) {
+    if (row >= rows || col >= cols) {
+        std::cout<<"index mimo rozmery matice";
+        exit(0);
+    }
+    return dta[row][col];
+}
+
+template<typename T>
+T Matice<T>::operator()(size_t row, size_t col) const{
     if (row >= rows || col >= cols) {
         std::cout<<"index mimo rozmery matice";
         exit(0);
