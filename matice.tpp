@@ -104,12 +104,12 @@ void Matice<T>::load_stdvv(const std::vector<std::vector<T>>& input) {
 }
 
 template<typename T>
-size_t Matice<T>::getRows() {
+size_t Matice<T>::getRows() const {
     return rows;
 }
 
 template<typename T>
-size_t Matice<T>::getCols() {
+size_t Matice<T>::getCols() const {
     return cols;
 }
 
@@ -139,6 +139,7 @@ void Matice<T>::printMat() {
         }
         std::cout << std::endl;
     }
+    std::cout<<"\n";
 }
 
 template<typename T>

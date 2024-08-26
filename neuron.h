@@ -20,18 +20,21 @@ public:
     void get_vystup();
     void get_aktiv();
 
-    
+    double der_akt_fun(double aktiv);
 
     double o;
     double a;
     double delta;
-    double der_akt_fun(double aktiv);
+    bool bias;
+    enum {sigmoid,linear,leakyrelu} aktfunkce;
+    std::vector<double> Mt;
+    std::vector<double> Mt_s;
+    std::vector<double> Vt;
+    std::vector<double> Vt_s;
     std::vector<double> vstupy;
     std::vector<double> vahy;
     std::vector<double> vystupy_historie;
     std::vector<double> aktiv_historie;
-    bool bias;
-    enum {sigmoid} aktfunkce;
 };
 
 #endif // NEURON_H

@@ -75,11 +75,6 @@ Rcpp::XPtr<NN> udelej_nn() {
     return Rcpp::XPtr<NN>(new NN());
 }
 
-//[[Rcpp::export]]
-void nn_set_rozmery(Rcpp::XPtr<NN> nn, Rcpp::NumericVector rozmers){
-    std::vector<int> rozmers_c = Rcpp::as<std::vector<int>>(rozmers);
-    nn->set_rozmery(rozmers_c);
-}
 
 //[[Rcpp::export]]
 void nn_set_chtenejout(Rcpp::XPtr<NN> nn, Rcpp::NumericVector obsout){
@@ -93,13 +88,24 @@ void nn_print_nn(Rcpp::XPtr<NN> nn){
 }
 
 //[[Rcpp::export]]
-void nn_init_nn(Rcpp::XPtr<NN> nn){
-    nn->init_sit();
+void nn_init_nn(Rcpp::XPtr<NN> nn,int pocet_vst, Rcpp::NumericVector rozmers){
+    std::vector<int> rozmers_c = Rcpp::as<std::vector<int>>(rozmers);
+    nn->init_sit(pocet_vst,rozmers_c);
 }
 
 //[[Rcpp::export]]
 void nn_online_bp(Rcpp::XPtr<NN> nn,int iters){
     nn->online_bp(iters);
+}
+
+//[[Rcpp::export]]
+void nn_online_bp_adam(Rcpp::XPtr<NN> nn,int iters){
+    nn->online_bp_adam(iters);
+}
+
+//[[Rcpp::export]]
+void nn_cnn_pokus(Rcpp::XPtr<NN> nn,int iters){
+    nn->cnn_pokus(iters);
 }
 
 //[[Rcpp::export]]
@@ -143,4 +149,55 @@ Rcpp::NumericVector nn_get_vystupy(Rcpp::XPtr<NN> nn) {
 double nn_count_cost(Rcpp::XPtr<NN> nn){
     nn->count_cost();
     return nn->cost;
+}
+
+//[[Rcpp::export]]
+void nn_set_vstup_rada(Rcpp::XPtr<NN> nn, Rcpp::NumericVector input_cr){
+    std::vector<double> input_cr_c = Rcpp::as<std::vector<double>>(input_cr);
+    nn->set_vstup_rada(input_cr_c);
+}
+
+// [[Rcpp::export]]
+void nn_udelej_radky(Rcpp::XPtr<NN> nn, size_t velrad,bool tenzor){
+    nn->udelej_radky(velrad,tenzor);
+}
+
+// [[Rcpp::export]]
+void nn_udelej_lag(Rcpp::XPtr<NN> nn, size_t lag,bool tenzor){
+    nn->udelej_lag(lag,tenzor);
+}
+
+// [[Rcpp::export]]
+void nn_udelej_api(Rcpp::XPtr<NN> nn,int n, double beta, int coze, int kolik,bool tenzor) {
+
+  NN::Co coze_enum;
+  if (coze == 0) {
+    coze_enum = NN::radky;
+  } else if (coze == 1) {
+    coze_enum = NN::lag;
+  } else {
+    Rcpp::stop("Neplatná hodnota pro 'coze'");
+  }
+  
+  nn->udelej_api(n, beta, coze_enum, kolik,tenzor);
+}
+
+// [[Rcpp::export]]
+void nn_udelej_prumery(Rcpp::XPtr<NN> nn, int n, int coze, int kolik,bool tenzor) {
+
+  NN::Co coze_enum;
+  if (coze == 0) {
+    coze_enum = NN::radky;
+  } else if (coze == 1) {
+    coze_enum = NN::lag;
+  } else {
+    Rcpp::stop("Neplatná hodnota pro 'coze'");
+  }
+  
+  nn->udelej_prumery(n, coze_enum, kolik,tenzor);
+}
+
+//[[Rcpp::export]]
+void nn_print_neco(Rcpp::XPtr<NN> nn){
+    nn->dataprocnn_v2d[0].printMat();
 }

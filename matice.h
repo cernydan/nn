@@ -24,8 +24,8 @@ public:
     T& operator()(size_t row, size_t col);           // & adresa prvku - umožňuje změnu/zápis
     T operator()(size_t row, size_t col) const;     // const - jen čtení
     
-    size_t getRows();
-    size_t getCols();
+    size_t getRows() const;
+    size_t getCols() const;
     T getElement(size_t row, size_t col);
 
     void setElement(size_t row, size_t col, T value);
