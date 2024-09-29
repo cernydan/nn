@@ -33,7 +33,7 @@ public:
     void load_stdvv(const std::vector<std::vector<std::vector<T>>>& input);    // Načtení dat z std::v<std::v<std::v>>
     void printTenzor();
     void add_matrix(const Matice<T>& matice);
-
+    void set_matrix(size_t depth, const Matice<T>& matice);
     
 };
 

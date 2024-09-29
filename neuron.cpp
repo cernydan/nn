@@ -18,8 +18,6 @@ Neuron::Neuron()    //konstruktor
     Vt_s.clear();
     vstupy.clear();
     vahy.clear();
-    vystupy_historie.clear();
-    aktiv_historie.clear();
 }
 
 Neuron::~Neuron()   // Destruktor
@@ -30,8 +28,6 @@ Neuron::~Neuron()   // Destruktor
     Vt_s.clear();
     vstupy.clear();
     vahy.clear();
-    vystupy_historie.clear();
-    aktiv_historie.clear();
 }
 
 Neuron::Neuron(const Neuron& other) :   // Kopírovací konstruktor
@@ -45,9 +41,7 @@ Neuron::Neuron(const Neuron& other) :   // Kopírovací konstruktor
     Vt(other.Vt),
     Vt_s(other.Vt_s),
     vstupy(other.vstupy),
-    vahy(other.vahy),
-    vystupy_historie(other.vystupy_historie),
-    aktiv_historie(other.aktiv_historie) {}
+    vahy(other.vahy){}
 
 
 Neuron::Neuron(Neuron&& other) noexcept :       //Move konstruktor
@@ -57,8 +51,6 @@ Neuron::Neuron(Neuron&& other) noexcept :       //Move konstruktor
     bias(std::move(other.bias)),
     vstupy(std::move(other.vstupy)),
     vahy(std::move(other.vahy)),
-    vystupy_historie(std::move(other.vystupy_historie)),
-    aktiv_historie(std::move(other.aktiv_historie)),
     aktfunkce(std::move(other.aktfunkce)),
     Mt(std::move(other.Mt)),
     Mt_s(std::move(other.Mt_s)),
@@ -73,8 +65,6 @@ Neuron::Neuron(Neuron&& other) noexcept :       //Move konstruktor
     other.aktfunkce = sigmoid;
     other.vstupy.clear();
     other.vahy.clear();
-    other.vystupy_historie.clear();
-    other.aktiv_historie.clear();
     other.Mt.clear();
     other.Mt_s.clear();
     other.Vt.clear();
@@ -90,8 +80,6 @@ Neuron& Neuron::operator=(const Neuron& other) {        // Kopírovací přiřaz
         bias = other.bias;
         vstupy = other.vstupy;
         vahy = other.vahy;
-        vystupy_historie = other.vystupy_historie;
-        aktiv_historie = other.aktiv_historie;
         aktfunkce = other.aktfunkce;
         Mt = other.Mt;
         Mt_s = other.Mt_s;
@@ -110,8 +98,6 @@ Neuron& Neuron::operator=(Neuron&& other) noexcept {        // Move přiřazovac
         bias = std::move(other.bias);
         vstupy = std::move(other.vstupy);
         vahy = std::move(other.vahy);
-        vystupy_historie = std::move(other.vystupy_historie);
-        aktiv_historie = std::move(other.aktiv_historie);
         aktfunkce = std::move(other.aktfunkce);
         Mt = std::move(other.Mt);
         Mt_s = std::move(other.Mt_s);
@@ -126,8 +112,6 @@ Neuron& Neuron::operator=(Neuron&& other) noexcept {        // Move přiřazovac
         other.aktfunkce = sigmoid;
         other.vstupy.clear();
         other.vahy.clear();
-        other.vystupy_historie.clear();
-        other.aktiv_historie.clear();
         other.Mt.clear();
         other.Mt_s.clear();
         other.Vt.clear();
@@ -191,10 +175,11 @@ void Neuron::vypocet() {
             o = a;
         }
 
+        case tanh:
+        o = (exp(a)-exp(-a))/(exp(a)+exp(-a));
+
         break;
     }
-    get_vystup();
-    get_aktiv();
 }
 
 void Neuron::print_neuron() {
@@ -207,18 +192,12 @@ void Neuron::print_neuron() {
 
 }
 
-void Neuron::get_vystup() {
-    vystupy_historie.push_back(o);
-    if (vystupy_historie.size() > 5) {
-        vystupy_historie.erase(vystupy_historie.begin());
-    }
+double Neuron::get_vystup() {
+    return o;
 }
 
-void Neuron::get_aktiv() {
-    aktiv_historie.push_back(a);
-    if (aktiv_historie.size() > 5) {
-        aktiv_historie.erase(aktiv_historie.begin());
-    }
+double Neuron::get_aktiv() {
+    return a;
 }
 
 double Neuron::der_akt_fun(double aktiv){
@@ -235,6 +214,9 @@ double Neuron::der_akt_fun(double aktiv){
             } else {
                 return 1.0;
             }
+        
+        case tanh:
+            return (1-pow(((exp(aktiv)-exp(-aktiv))/(exp(aktiv)+exp(-aktiv))),2));
 
         default:
             return aktiv;

@@ -17,24 +17,23 @@ public:
     void set_randomvahy();
     void set_rucovahy(const std::vector<double>& weights);
     void print_neuron();
-    void get_vystup();
-    void get_aktiv();
-
+    
+    double get_vystup();
+    double get_aktiv();
     double der_akt_fun(double aktiv);
 
     double o;
     double a;
     double delta;
     bool bias;
-    enum {sigmoid,linear,leakyrelu} aktfunkce;
+    enum {sigmoid,linear,leakyrelu,tanh} aktfunkce;
     std::vector<double> Mt;
     std::vector<double> Mt_s;
     std::vector<double> Vt;
     std::vector<double> Vt_s;
     std::vector<double> vstupy;
     std::vector<double> vahy;
-    std::vector<double> vystupy_historie;
-    std::vector<double> aktiv_historie;
+
 };
 
 #endif // NEURON_H

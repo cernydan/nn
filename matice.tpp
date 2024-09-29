@@ -161,3 +161,44 @@ T Matice<T>::operator()(size_t row, size_t col) const{
 }
 
 
+template<typename T>
+void Matice<T>::shuffle_radky() {
+    if (rows <= 1) {
+        return;
+    }
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    std::shuffle(dta, dta + rows, gen);
+}
+
+template<typename T>
+void Matice<T>::shuffle_radkyavec(std::vector<T>& vec) {
+    if (vec.size() != rows) {
+        throw std::invalid_argument("Délka vektoru musí odpovídat počtu řádků matice.");
+    }
+    if (rows <= 1) {
+        return;
+    }
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::vector<size_t> indexy(rows);
+    for (size_t i = 0; i < rows; ++i) {
+        indexy[i] = i;
+    }
+    std::shuffle(indexy.begin(), indexy.end(), gen);
+    T** new_dta = new T*[rows];
+    std::vector<T> new_vec(rows);
+
+    for (size_t i = 0; i < rows; ++i) {
+        new_dta[i] = dta[indexy[i]];
+        new_vec[i] = vec[indexy[i]];
+    }
+
+    for (size_t i = 0; i < rows; ++i) {
+        dta[i] = new_dta[i];
+        vec[i] = new_vec[i];
+    }
+
+    delete[] new_dta;
+}

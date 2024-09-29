@@ -167,6 +167,27 @@ void Tenzor<T>::setElement(size_t depth, size_t row, size_t col, T value) {
 }
 
 template<typename T>
+void Tenzor<T>::set_matrix(size_t depth, const Matice<T>& matice) {
+    if (depth >= this->depth){
+        std::cout << "Index depth větší než depth tenzoru." << std::endl;
+        exit(0);
+    }
+
+    if (matice.getRows() != rows || matice.getCols() != cols) {
+            std::cout << "Rozměry matice neodpovídají rozměrům tenzoru." << std::endl;
+            exit(0);
+        }
+
+    for (int i=0;i<rows;i++){
+        for(int j=0;j<cols;j++){
+            dta[depth][i][j] = matice(i,j);
+        }
+    }
+    
+}
+
+
+template<typename T>
 void Tenzor<T>::printTenzor() {
     for (size_t i = 0; i < depth; ++i) {
         std::cout << "Vrstva " << i << ":\n";

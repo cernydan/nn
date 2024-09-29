@@ -12,7 +12,7 @@
                 "${fileDirname}/${fileBasenameNoExtension}",
                 //"-DARMA_DONT_USE_WRAPPER",
                 "-larmadillo",
-                "-fopenmp", 
+                "-fopenmp"
                 
             ],
             

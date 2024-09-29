@@ -57,17 +57,6 @@ Rcpp::NumericVector neuron_get_vahy(Rcpp::XPtr<Neuron> neuron) {
     return Rcpp::wrap(neuron->vahy);
 }
 
-// [[Rcpp::export]]
-Rcpp::NumericVector neuron_get_vystupy_historie(Rcpp::XPtr<Neuron> neuron) {
-    return Rcpp::wrap(neuron->vystupy_historie);
-}
-
-// [[Rcpp::export]]
-Rcpp::NumericVector neuron_get_aktiv_historie(Rcpp::XPtr<Neuron> neuron) {
-    return Rcpp::wrap(neuron->aktiv_historie);
-}
-
-
 /////////////////////////    NEURAL NET     //////////////////////////////////////////////////////////
 
 // [[Rcpp::export]]
@@ -200,4 +189,9 @@ void nn_udelej_prumery(Rcpp::XPtr<NN> nn, int n, int coze, int kolik,bool tenzor
 //[[Rcpp::export]]
 void nn_print_neco(Rcpp::XPtr<NN> nn){
     nn->dataprocnn_v2d[0].printMat();
+}
+
+//[[Rcpp::export]]
+void nn_shuffle_train(Rcpp::XPtr<NN> nn){
+    nn->shuffle_train();
 }

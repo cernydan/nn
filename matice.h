@@ -4,6 +4,8 @@
 #include <vector>
 #include <stdexcept>
 #include <iostream>
+#include <algorithm>
+#include <random>
 
 template<typename T>  // šablona pro třídu s libovolným datovým typem - dosazení za T
 class Matice {
@@ -31,6 +33,8 @@ public:
     void setElement(size_t row, size_t col, T value);
     void load_stdvv(const std::vector<std::vector<T>>& input);    // Načtení dat z std::vector<std::vector<double>>
     void printMat();
+    void shuffle_radky();
+    void shuffle_radkyavec(std::vector<T>& vec);
 
     
 };

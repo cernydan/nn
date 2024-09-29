@@ -57,6 +57,7 @@ public:
     void set_train_data(const std::vector<std::vector<double>>& datas);
     void set_val_data(const std::vector<std::vector<double>>& datas);
     void print_data();
+    void shuffle_train();
 
     void set_vstup_rada(const std::vector<double>& inputs);
     void udelej_radky(size_t velrad, bool tenzor);

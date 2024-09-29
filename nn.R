@@ -17,11 +17,11 @@ dt2 = matrix(0, nrow = (length(Qval)-LAG), ncol = LAG )
 for (i in 1:LAG){ dt2[,i] = Qval[(LAG-i+1):(length(Qval)-i)] }
 
 mlp <- udelej_nn()
-nn_set_rozmery(mlp,c(4,4,2,1))
+nn_init_nn(mlp,LAG,c(4,4,2,1))
 nn_set_chtenejout(mlp,Qkal)
 nn_set_traindata(mlp,dt)
+nn_shuffle_train(mlp)
 nn_print_data(mlp)
-nn_init_nn(mlp,LAG)
 nn_online_bp_adam(mlp,1000)
 simulout <- nn_get_vystupy(mlp)
 nn_set_valdata(mlp,dt2)
@@ -62,7 +62,6 @@ Qcamel <- Qcamel[1:length(VALScamel$V1),]
 Qcamel$Q <- Qcamel$Q * 0.0283168466
 Rcamel <- VALScamel$V6
 
-
 Qkal = Qcamel$Q[1:6000]
 Qval = Qcamel$Q[6001:12000]
 
@@ -77,12 +76,12 @@ for (i in 1:LAG){ dt2[,i] = Qval[(LAG-i+1):(length(Qval)-i)] }
 chtenejout2 = Qval[(LAG+1):length(Qval)]
 
 mlp <- udelej_nn()
-nn_set_rozmery(mlp,c(10,10,10,10,1))
 nn_set_chtenejout(mlp,chtenejout)
 nn_set_traindata(mlp,dt)
+#nn_shuffle_train(mlp)
 nn_print_data(mlp)
-nn_init_nn(mlp,LAG)
-nn_online_bp_adam(mlp,1000)
+nn_init_nn(mlp,LAG,c(5,5,5,5,5,1))
+nn_online_bp_adam(mlp,200)
 simulout <- nn_get_vystupy(mlp)
 nn_set_valdata(mlp,dt2)
 nn_valid(mlp)
@@ -128,19 +127,19 @@ Rcamel <- VALScamel$V6
 
 Qcamel$Q <- (Qcamel$Q-min(Qcamel$Q))/(max(Qcamel$Q)-min(Qcamel$Q))
 
-Qkal = Qcamel$Q[1:6000]
-Qval = Qcamel$Q[6001:12000]
+Qkal = Qcamel$Q[1:1200]
+Qval = Qcamel$Q[1096:2190]
 
-chtenejout = Qkal[4:6000]
+chtenejout = Qkal[c(4:366,369:731,734:1096)]
 
 mlp <- udelej_nn()
-nn_set_rozmery(mlp,c(10,10,5,5,1))
+nn_init_nn(mlp,5,c(10,10,5,5,1))
 nn_set_chtenejout(mlp,chtenejout)
 nn_set_vstup_rada(mlp,Qkal)
 nn_udelej_radky(mlp,365)
-nn_init_nn(mlp,5)
 
-nn_cnn_pokus(mlp,5)
+
+nn_cnn_pokus(mlp,100)
 simulout <- nn_get_vystupy(mlp)
 
 

@@ -190,6 +190,30 @@ void NN::set_val_data(const std::vector<std::vector<double>>& datas){
     val_data = datas;
 }
 
+void NN::shuffle_train() {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::vector<size_t> indexy(train_data.size());
+    for (size_t i = 0; i < train_data.size(); ++i) {
+        indexy[i] = i;
+    }
+    std::shuffle(indexy.begin(), indexy.end(), gen);
+    std::vector<std::vector<double>> new_data(train_data.size());
+    std::vector<double> new_vec(chtenejout.size());
+
+    for (size_t i = 0; i < train_data.size(); ++i) {
+        new_data[i] = train_data[indexy[i]];
+        new_vec[i] = chtenejout[indexy[i]];
+    }
+
+    train_data = new_data;
+    chtenejout = std::move(new_vec);
+
+    new_data.clear();
+    new_vec.clear();
+
+}
+
 
 void NN::print_data(){
     for (int i = 0; i<train_data.size();++i){
