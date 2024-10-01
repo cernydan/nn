@@ -1,5 +1,4 @@
 #include "neural_net.h"
-#include "neuron.h"
 #include <random>
 #include <iostream>
 #include <cmath>
@@ -264,6 +263,41 @@ void NN::init_sit(int poc_vstupu, const std::vector<int>& rozmers) {
     }
 }
 
+void NN::init_lstm(int poc_vstupu, const std::vector<int>& rozmers) {
+    rozmery = rozmers;
+    pocet_vrstev = rozmery.size();
+    lstm_sit.clear();
+    lstm_sit.resize(pocet_vrstev);
+    for (int i = 0; i < pocet_vrstev; ++i) {
+        lstm_sit[i].resize(rozmery[i]);
+        for (int j = 0; j < rozmery[i]; ++j) {
+            lstm_sit[i][j] = LSTMNeuron();
+        }
+    }
+    pom_vystup.clear();
+    vystupy.clear();
+    std::vector<double> pomvec_nastav(poc_vstupu);
+    for (int i = 0; i < rozmery[0]; ++i) {
+        lstm_sit[0][i].set_vstupy(pomvec_nastav);
+        lstm_sit[0][i].set_randomvahy();
+        lstm_sit[0][i].vypocet();
+        pom_vystup.push_back(lstm_sit[0][i].shortterm);
+    }
+    pomvec_nastav.clear();
+
+    for (int i = 1; i < pocet_vrstev; ++i) {
+        for (int j = 0; j < rozmery[i]; ++j) {
+            lstm_sit[i][j].set_vstupy(pom_vystup);
+            lstm_sit[i][j].set_randomvahy();
+            lstm_sit[i][j].vypocet();
+        }
+        pom_vystup.clear();
+        for (int j = 0; j < rozmery[i]; ++j) {
+            pom_vystup.push_back( lstm_sit[i][j].shortterm);
+        }
+    }
+}
+
 void NN::online_bp(int iter){
     for(int m = 0;m<iter;++m){
         std::cout<<m<<"\n";
@@ -400,6 +434,63 @@ void NN::valid(){
                             // dava smysl jen pro 1 vystup
     }
 }
+
+void NN::online_lstm(int iter){
+    for(int m = 0;m<iter;++m){
+        std::cout<<m<<"\n";
+    vystupy.clear();
+    pom_vystup.clear();
+    for (int l = 0;l<train_data.size();++l){
+        for (int i = 0; i < rozmery[0]; ++i) {
+            lstm_sit[0][i].set_vstupy (train_data[l]);
+            lstm_sit[0][i].vypocet();
+            pom_vystup.push_back(lstm_sit[0][i].shortterm);
+        }
+        
+        for (int i = 1; i < pocet_vrstev; ++i) {
+            for (int j = 0; j < rozmery[i]; ++j) {
+                lstm_sit[i][j].set_vstupy(pom_vystup);
+                lstm_sit[i][j].vypocet();
+            }
+            pom_vystup.clear();
+            for (int j = 0; j < rozmery[i]; ++j) {
+                pom_vystup.push_back(lstm_sit[i][j].shortterm);
+            }
+        }
+        vystupy.push_back(pom_vystup[0]);
+                            // dava smysl jen pro 1 vystup
+
+//////////////////////////////////
+//  BACKPROPAGACE 
+//PŘEDĚLAT
+
+    //     sit[pocet_vrstev-1][rozmery[pocet_vrstev-1]-1].delta = vystupy[l] - chtenejout[l];
+    //     for (int i=0;i<rozmery[pocet_vrstev-2];++i){
+    //         sit[pocet_vrstev-2][i].delta = sit[pocet_vrstev-2][i].der_akt_fun(sit[pocet_vrstev-2][i].a)*(sit[pocet_vrstev-1][rozmery[pocet_vrstev-1]-1].vahy[i] * sit[pocet_vrstev-1][rozmery[pocet_vrstev-1]-1].delta);
+    //      }
+
+    //     for(int j = (pocet_vrstev-3); j>=0;--j){
+    //         for (int i=0;i<rozmery[j];++i){
+    //              double skalsoucprv = 0.0;
+    //             for(int k = 0;k<rozmery[j+1];++k){
+    //                 skalsoucprv += sit[j+1][k].vahy[i] * sit[j+1][k].delta;
+    //             }
+            
+    //         sit[j][i].delta = sit[j][i].der_akt_fun(sit[j][i].a)*skalsoucprv;
+    //     }
+    // }
+
+    // for(int i = 0;i<pocet_vrstev;++i){
+    //     for(int j = 0;j<rozmery[i];++j){
+    //         for(int k = 0; k < sit[i][j].vahy.size();++k)
+    //             sit[i][j].vahy[k] = sit[i][j].vahy[k] - alfa * sit[i][j].delta * sit[i][j].vstupy[k];
+    //     }
+    // }
+
+                            
+    }
+}}
+
 
 void NN::count_cost(){
     cost = 0.0;

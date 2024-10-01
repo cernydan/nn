@@ -7,6 +7,8 @@
 #include "neuron.h"
 #include "matice.h"
 #include "tenzor.h"
+#include "lstmneuron.h"
+#include "lstmneuron.cpp"
 
 class NN{
 public:
@@ -26,6 +28,7 @@ public:
     enum Co {radky,lag};
     std::vector<int> rozmery;
     std::vector<std::vector<Neuron>> sit;
+    std::vector<std::vector<LSTMNeuron>> lstm_sit;
     std::vector<double> pom_vystup;
     std::vector<double> vystupy;
     std::vector<double> chtenejout;
@@ -47,6 +50,8 @@ public:
 
     void print_nn();
     void init_sit(int poc_vstupu, const std::vector<int>& rozmers);
+    void init_lstm(int poc_vstupu, const std::vector<int>& rozmers);
+    void online_lstm(int iter);
     void online_bp(int iter);
     void online_bp_adam(int iter);
     void set_chtenejout(const std::vector<double>& obsout);

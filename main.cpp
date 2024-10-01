@@ -2,6 +2,7 @@
 #include "neuron.h"
 #include "neural_net.cpp"
 #include "neuron.cpp"
+#include "lstmneuron.h"
 #include "matice.h"
 #include "tenzor.h"
 #include <valarray>
@@ -48,7 +49,7 @@ int main() {
    q.load_stdvv({{1,2,3,4,5},{1,2,3,4,5},{1,2,3,4,5},{1,2,3,4,5},{1,2,3,4,5}});
    Tenzor<double> z(25000000,5,5);
    q.printMat();
-    nastav(25000000,z,q);
+   nastav(25000000,z,q);
 
 
 
@@ -63,7 +64,6 @@ int main() {
     // for (auto& t : threads) {
     //     t.join();
     // }
-
 
 
 auto stop = high_resolution_clock::now();
