@@ -1,3 +1,4 @@
+#pragma once
 #ifndef LSTMNEURON_H
 #define LSTMNEURON_H
 
@@ -13,11 +14,16 @@ public:
     LSTMNeuron& operator=(LSTMNeuron&& other) noexcept;  // Move přiřazovací operátor
 
     Neuron forget;
-    Neuron input_s;
-    Neuron input_t;
+    Neuron update;
+    Neuron candidate;
     Neuron output;
-    double shortterm;
-    double longterm;
+    double shortterm,longterm,Wy,by,vystup;
+    std::vector<double> forget_hist,update_hist,candidate_hist,output_hist,shortterm_hist,longterm_hist,vystup_hist;
+    double dc = 0;
+    double da = 0;
+    double dLdz,dLda,dLdc,dLdcan,dLdu,dLdf,dLdo;
+    std::vector<double> dLdx;
+
 
     void set_vstupy(const std::vector<double>& inputs);
     void set_randomvahy();

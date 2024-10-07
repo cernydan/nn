@@ -1,3 +1,4 @@
+#pragma once
 #ifndef TENZOR_H
 #define TENZOR_H
 
@@ -34,6 +35,7 @@ public:
     void printTenzor();
     void add_matrix(const Matice<T>& matice);
     void set_matrix(size_t depth, const Matice<T>& matice);
+    void rand_vypln(double min, double max);
     
 };
 

@@ -1,3 +1,4 @@
+#pragma once
 #ifndef MATICE_H
 #define MATICE_H
 
@@ -35,6 +36,7 @@ public:
     void printMat();
     void shuffle_radky();
     void shuffle_radkyavec(std::vector<T>& vec);
+    void rand_vypln(double min, double max);
 
     
 };

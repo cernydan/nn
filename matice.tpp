@@ -202,3 +202,15 @@ void Matice<T>::shuffle_radkyavec(std::vector<T>& vec) {
 
     delete[] new_dta;
 }
+
+template<typename T>
+void Matice<T>::rand_vypln(double min, double max){
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis(min,max);
+    for (int i = 0;i<rows;i++){
+        for (int j = 0;j<cols;j++){
+            dta[i][j] = dis(gen);
+        }
+    }
+}

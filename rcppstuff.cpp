@@ -88,6 +88,16 @@ void nn_online_bp(Rcpp::XPtr<NN> nn,int iters){
 }
 
 //[[Rcpp::export]]
+void nn_online_bp_th(Rcpp::XPtr<NN> nn,int iters){
+    nn->online_bp_th(iters);
+}
+
+//[[Rcpp::export]]
+void lstm_1cell(Rcpp::XPtr<NN> nn,int batch_size,int iters){
+    nn->lstm_1cell(batch_size,iters);
+}
+
+//[[Rcpp::export]]
 void nn_online_bp_adam(Rcpp::XPtr<NN> nn,int iters){
     nn->online_bp_adam(iters);
 }

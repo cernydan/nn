@@ -1,3 +1,4 @@
+#pragma once
 #ifndef NEURAL_NET_H
 #define NEURAL_NET_H
 
@@ -8,7 +9,7 @@
 #include "matice.h"
 #include "tenzor.h"
 #include "lstmneuron.h"
-#include "lstmneuron.cpp"
+#include "threadpool.h"
 
 class NN{
 public:
@@ -48,12 +49,16 @@ public:
     Tenzor<double> dataprocnn_t;
     Tenzor<double> kernely_t;
 
+    void print_vystup();
     void print_nn();
     void init_sit(int poc_vstupu, const std::vector<int>& rozmers);
     void init_lstm(int poc_vstupu, const std::vector<int>& rozmers);
     void online_lstm(int iter);
+    void lstm_1cell(int batch_size, int iter);
     void online_bp(int iter);
     void online_bp_adam(int iter);
+    void online_bp_thread(int iter);
+    void online_bp_th(int iter);
     void set_chtenejout(const std::vector<double>& obsout);
     void valid();
     void count_cost();
@@ -69,6 +74,9 @@ public:
     void udelej_lag(size_t lag, bool tenzor);
     void udelej_api(int n, double beta, Co coze, int kolik, bool tenzor);
     void udelej_prumery(int n, Co coze, int kolik, bool tenzor);
+    double tanh(double x);
+
+    
 
 };
 

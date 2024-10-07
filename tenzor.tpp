@@ -257,3 +257,17 @@ void Tenzor<T>::add_matrix(const Matice<T>& matice) {
     ++depth;
 }
 
+template<typename T>
+void Tenzor<T>::rand_vypln(double min, double max){
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis(min,max);
+    for(int k = 0;k<depth;k++){
+        for (int i = 0;i<rows;i++){
+            for (int j = 0;j<cols;j++){
+                dta[k][i][j] = dis(gen);
+            }
+        }
+    }
+}
+

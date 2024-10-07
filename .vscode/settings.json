@@ -59,6 +59,7 @@
         "cinttypes": "cpp",
         "typeinfo": "cpp",
         "valarray": "cpp",
-        "*.tpp": "cpp"
+        "*.tpp": "cpp",
+        "future": "cpp"
     }
 }

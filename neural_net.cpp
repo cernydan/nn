@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cmath>
 #include <algorithm>
+#include <thread>
 
 using namespace std;
 
@@ -824,4 +825,270 @@ Matice<double> NN::konvo(Matice<double> vstupnim, Matice<double> vstupkernel){
         }
     }
     return vystupm;
+}
+
+void NN::print_vystup(){
+    for (int i = 0;i<vystupy.size();++i){
+        std::cout<<vystupy[i]<<" ";
+    }
+}
+
+// void NN::online_bp_thread(int iter) {
+//     int jadra = std::thread::hardware_concurrency();
+//     ThreadPool pool(jadra);
+//     for (int m = 0; m < iter; ++m) {
+//         std::cout << m << "\n";
+//         vystupy.clear();
+//         pom_vystup.clear();
+
+//         for (int l = 0; l < train_data.size(); ++l) {
+//             std::vector<std::future<void>> futures;
+//             int kusneur = rozmery[0]/jadra;
+
+//             // Paralelizace výpočtů neuronů první vrstvy
+//             for(int i = 0;i<jadra;++i){
+//                 int start = i*kusneur;
+//                 int end = (i == jadra - 1) ? rozmery[0] : start + kusneur;
+//                 futures.push_back(pool.enqueueTask([this, l, i,start,end]() {
+//                     for(int j = start;j<end;++j){
+//                         sit[0][j].set_vstupy(train_data[l]);
+//                         sit[0][j].vypocet();
+//                     }
+//                 }));
+//             }
+
+//             // Čekání na dokončení všech výpočtů pro první vrstvu
+//             for (auto& future : futures) {
+//                 future.get();
+//             }
+//             futures.clear();
+
+//             // Uložení výsledků první vrstvy
+//             for (int i = 0; i < rozmery[0]; ++i) {
+//                 pom_vystup.push_back(sit[0][i].o);
+//             }
+
+//             // Paralelizace výpočtů v dalších vrstvách
+//             for (int i = 1; i < pocet_vrstev; ++i) {
+//                 kusneur = rozmery[i]/jadra;
+//                 futures.clear();
+
+//                 for(int j = 0;j<jadra;++j){
+//                     int start = j*kusneur;
+//                     int end = (j == jadra - 1) ? rozmery[i] : start + kusneur;
+//                     futures.push_back(pool.enqueueTask([this, l, i,j,start,end]() {
+//                         for(int k = start;k<end;++k){
+//                             sit[i][k].set_vstupy(pom_vystup);
+//                             sit[i][k].vypocet();
+//                         }
+//                 }));
+//             }
+
+
+//                 for (auto& future : futures) {
+//                     future.get();
+//                 }
+//                 pom_vystup.clear();
+
+//                 // Uložení výstupů aktuální vrstvy
+//                 for (int j = 0; j < rozmery[i]; ++j) {
+//                     pom_vystup.push_back(sit[i][j].o);
+//                 }
+//             }
+//             vystupy.push_back(pom_vystup[0]);
+//                             // dava smysl jen pro 1 vystup
+
+//             // BP - Backpropagation výpočty delta hodnot
+//            sit[pocet_vrstev-1][rozmery[pocet_vrstev-1]-1].delta = vystupy[l] - chtenejout[l];
+//         for (int i=0;i<rozmery[pocet_vrstev-2];++i){
+//             sit[pocet_vrstev-2][i].delta = sit[pocet_vrstev-2][i].der_akt_fun(sit[pocet_vrstev-2][i].a)*(sit[pocet_vrstev-1][rozmery[pocet_vrstev-1]-1].vahy[i] * sit[pocet_vrstev-1][rozmery[pocet_vrstev-1]-1].delta);
+//          }
+
+//         for(int j = (pocet_vrstev-3); j>=0;--j){
+//             for (int i=0;i<rozmery[j];++i){
+//                  double skalsoucprv = 0.0;
+//                 for(int k = 0;k<rozmery[j+1];++k){
+//                     skalsoucprv += sit[j+1][k].vahy[i] * sit[j+1][k].delta;
+//                 }
+            
+//             sit[j][i].delta = sit[j][i].der_akt_fun(sit[j][i].a)*skalsoucprv;
+//         }
+//     }
+
+//     for(int i = 0;i<pocet_vrstev;++i){
+//         for(int j = 0;j<rozmery[i];++j){
+//             for(int k = 0; k < sit[i][j].vahy.size();++k)
+//                 sit[i][j].vahy[k] = sit[i][j].vahy[k] - alfa * sit[i][j].delta * sit[i][j].vstupy[k];
+//         }
+//     }
+//         }
+//     }
+// }
+
+
+void NN::online_bp_th(int iter) {
+    int jadra = std::thread::hardware_concurrency();
+    std::vector<std::thread> threads;
+    for (int m = 0; m < iter; ++m) {
+        std::cout << m << "\n";
+        vystupy.clear();
+        pom_vystup.clear();
+
+        for (int l = 0; l < train_data.size(); ++l) {
+            int kusneur = rozmery[0]/jadra;
+
+            // Paralelizace výpočtů neuronů první vrstvy
+            for(int i = 0;i<jadra;++i){
+                int start = i*kusneur;
+                int end = (i == jadra - 1) ? rozmery[0] : start + kusneur;
+                threads.push_back(std::thread([this, l, i,start,end](){
+                    for(int j = start;j<end;++j){
+                        sit[0][j].set_vstupy(train_data[l]);
+                        sit[0][j].vypocet();
+                    }
+                }));
+            }
+
+            for (auto& t : threads) {
+              t.join();
+            }
+
+            threads.clear();
+
+            // Uložení výsledků první vrstvy
+            for (int i = 0; i < rozmery[0]; ++i) {
+                pom_vystup.push_back(sit[0][i].o);
+            }
+
+            // Paralelizace výpočtů v dalších vrstvách
+            for (int i = 1; i < pocet_vrstev; ++i) {
+                kusneur = rozmery[i]/jadra;
+
+                for(int j = 0;j<jadra;++j){
+                    int start = j*kusneur;
+                    int end = (j == jadra - 1) ? rozmery[i] : start + kusneur;
+                    threads.push_back(std::thread([this, l, i,j,start,end]() {
+                        for(int k = start;k<end;++k){
+                            sit[i][k].set_vstupy(pom_vystup);
+                            sit[i][k].vypocet();
+                        }
+                }));
+            }
+
+
+               for (auto& t : threads) {
+              t.join();
+            }
+                pom_vystup.clear();
+                threads.clear();
+
+                // Uložení výstupů aktuální vrstvy
+                for (int j = 0; j < rozmery[i]; ++j) {
+                    pom_vystup.push_back(sit[i][j].o);
+                }
+            }
+            vystupy.push_back(pom_vystup[0]);
+                            // dava smysl jen pro 1 vystup
+
+            // BP - Backpropagation výpočty delta hodnot
+           sit[pocet_vrstev-1][rozmery[pocet_vrstev-1]-1].delta = vystupy[l] - chtenejout[l];
+        for (int i=0;i<rozmery[pocet_vrstev-2];++i){
+            sit[pocet_vrstev-2][i].delta = sit[pocet_vrstev-2][i].der_akt_fun(sit[pocet_vrstev-2][i].a)*(sit[pocet_vrstev-1][rozmery[pocet_vrstev-1]-1].vahy[i] * sit[pocet_vrstev-1][rozmery[pocet_vrstev-1]-1].delta);
+         }
+
+        for(int j = (pocet_vrstev-3); j>=0;--j){
+            for (int i=0;i<rozmery[j];++i){
+                 double skalsoucprv = 0.0;
+                for(int k = 0;k<rozmery[j+1];++k){
+                    skalsoucprv += sit[j+1][k].vahy[i] * sit[j+1][k].delta;
+                }
+            
+            sit[j][i].delta = sit[j][i].der_akt_fun(sit[j][i].a)*skalsoucprv;
+        }
+    }
+
+    for(int i = 0;i<pocet_vrstev;++i){
+        for(int j = 0;j<rozmery[i];++j){
+            for(int k = 0; k < sit[i][j].vahy.size();++k)
+                sit[i][j].vahy[k] = sit[i][j].vahy[k] - alfa * sit[i][j].delta * sit[i][j].vstupy[k];
+        }
+    }
+        }
+    }
+}
+
+double NN::tanh(double x){
+    return (exp(x)-exp(-x))/(exp(x)+exp(-x));
+}
+
+void NN::lstm_1cell(int batch_size,int iter){
+    LSTMNeuron pepa;
+    pepa.set_vstupy(train_data[0]);
+    pepa.set_randomvahy();
+    for(int m = 0;m<iter;++m){
+        int pozice = 0;
+        vystupy.clear();
+        for(int k = 0;k<(train_data.size()/batch_size);++k){
+            for (int i = pozice;i<(pozice+batch_size);++i ){
+                pepa.set_vstupy(train_data[i]);
+                pepa.vypocet();
+                vystupy.push_back(pepa.vystup);
+            }
+
+            for(int i =(batch_size-1);i>=0;--i){
+                pepa.dLdz = pepa.vystup_hist[i] - chtenejout[i+pozice];
+                pepa.dLda = pepa.Wy*pepa.dLdz + pepa.da;
+                pepa.dLdc = pepa.dc + pepa.dLda*pepa.output_hist[i]*(1-pow(tanh(pepa.longterm_hist[i]),2));
+                pepa.dLdcan = pepa.dLdc*pepa.update_hist[i]*(1-pow(pepa.candidate_hist[i],2));
+                pepa.dLdu = pepa.dLdc*pepa.candidate_hist[i]*(pepa.update_hist[i]*(1-pepa.update_hist[i]));
+                pepa.dLdf = pepa.dLdc*pepa.candidate_hist[i]*(pepa.forget_hist[i]*(1-pepa.forget_hist[i]));
+                pepa.dLdo = pepa.dLda*tanh(pepa.longterm_hist[i])*(pepa.output_hist[i]*(1-pepa.output_hist[i]));
+                pepa.dc = (pepa.dc+pepa.dLda*pepa.output_hist[i]*(1-pow(tanh(pepa.longterm_hist[i]),2)))*pepa.forget_hist[i];
+                pepa.da = pepa.candidate.vahy[pepa.candidate.vahy.size()]*pepa.dLdcan +
+                        pepa.update.vahy[pepa.update.vahy.size()]*pepa.dLdu + 
+                        pepa.forget.vahy[pepa.forget.vahy.size()]*pepa.dLdf + 
+                        pepa.output.vahy[pepa.output.vahy.size()]*pepa.dLdo;
+                for(int j = 0;j<(pepa.forget.vahy.size()-2);++j){
+                    pepa.dLdx.push_back(
+                        pepa.candidate.vahy[j]*pepa.dLdcan +
+                        pepa.update.vahy[j]*pepa.dLdu + 
+                        pepa.forget.vahy[j]*pepa.dLdf + 
+                        pepa.output.vahy[j]*pepa.dLdo
+                    );
+
+                    pepa.candidate.vahy[j] = pepa.candidate.vahy[j] - alfa*pepa.dLdcan*train_data[i+pozice][j];
+                    pepa.update.vahy[j] = pepa.update.vahy[j] - alfa*pepa.dLdu*train_data[i+pozice][j]; 
+                    pepa.forget.vahy[j] = pepa.forget.vahy[j] - alfa*pepa.dLdf*train_data[i+pozice][j];
+                    pepa.output.vahy[j] = pepa.output.vahy[j] - alfa*pepa.dLdo*train_data[i+pozice][j];
+
+                }
+                pepa.candidate.vahy[pepa.candidate.vahy.size()-2] = pepa.candidate.vahy[pepa.candidate.vahy.size()-2]-alfa*pepa.dLdcan;
+                pepa.update.vahy[pepa.update.vahy.size()-2] = pepa.update.vahy[pepa.update.vahy.size()-2] - alfa*pepa.dLdu; 
+                pepa.forget.vahy[pepa.forget.vahy.size()-2] = pepa.forget.vahy[pepa.forget.vahy.size()-2] - alfa*pepa.dLdf;
+                pepa.output.vahy[pepa.output.vahy.size()-2] = pepa.output.vahy[pepa.output.vahy.size()-2] - alfa*pepa.dLdo;
+                pepa.by = pepa.by - alfa* pepa.dLdz;
+                pepa.Wy = pepa.Wy - alfa* pepa.dLdz* pepa.shortterm_hist[i];
+
+                if(i != 0){
+                    pepa.candidate.vahy[pepa.candidate.vahy.size()-1] = pepa.candidate.vahy[pepa.candidate.vahy.size()-1]-
+                                                                        alfa*pepa.dLdcan*pepa.shortterm_hist[i-1];
+                    pepa.update.vahy[pepa.update.vahy.size()-1] = pepa.update.vahy[pepa.update.vahy.size()-1] - 
+                                                                alfa*pepa.dLdu*pepa.shortterm_hist[i-1]; 
+                    pepa.forget.vahy[pepa.forget.vahy.size()-1] = pepa.forget.vahy[pepa.forget.vahy.size()-1] - 
+                                                                alfa*pepa.dLdf*pepa.shortterm_hist[i-1];
+                    pepa.output.vahy[pepa.output.vahy.size()-1] = pepa.output.vahy[pepa.output.vahy.size()-1] - 
+                                                                alfa*pepa.dLdo*pepa.shortterm_hist[i-1];
+                }
+            }
+            pozice += batch_size;
+            pepa.forget_hist.clear();
+            pepa.update_hist.clear();
+            pepa.candidate_hist.clear();
+            pepa.output_hist.clear();
+            pepa.shortterm_hist.clear();
+            pepa.longterm_hist.clear();
+            pepa.vystup_hist.clear();
+            pepa.dLdx.clear();
+        }
+    }
 }
