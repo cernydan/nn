@@ -37,6 +37,8 @@ public:
     void shuffle_radky();
     void shuffle_radkyavec(std::vector<T>& vec);
     void rand_vypln(double min, double max);
+    void resize(size_t radky, size_t sloupce);
+    void o180_nuly(size_t layers);
 
     
 };

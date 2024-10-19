@@ -1,4 +1,4 @@
-library(Rcpp)
+{library(Rcpp)
 setwd("C:/Users/danek/Desktop/mlpR/vsnn")
 
 Rcpp::sourceCpp("rcppstuff.cpp")
@@ -31,8 +31,7 @@ simulout2 <- nn_get_vystupy(mlp)
 plot(c(Qkal,Qval),type = "l")
 lines(c(simulout,simulout2),col = "red")
 error <- nn_count_cost(mlp)
-error
-
+error}
 #############################################################################################xx
 library(Rcpp)
 setwd("C:/Users/danek/Desktop/mlpR/vsnn")
@@ -66,7 +65,7 @@ Qkal = Qcamel$Q[1:9000]
 Qval = Qcamel$Q[9001:12000]
 
 LAG = 5
-pn = 50
+pn = 1
 {
 dt = matrix(0, nrow = (length(Qkal)-LAG), ncol = LAG )
 for (i in 1:LAG){ dt[,i] = Qkal[(LAG-i+1):(length(Qkal)-i)] }
@@ -82,7 +81,7 @@ nn_set_traindata(mlp,dt)
 #nn_shuffle_train(mlp)
 #nn_print_data(mlp)
 nn_init_nn(mlp,LAG,c(pn,1))
-nn_online_bp_adam(mlp,20)
+nn_online_bp_adam(mlp,50)
 simulout <- nn_get_vystupy(mlp)
 nn_set_valdata(mlp,dt2)
 nn_valid(mlp)
@@ -94,6 +93,8 @@ lines(c(simulout,simulout2),col = "red")
 error <- nn_count_cost(mlp)
 error
 }
+plot(Qval[1:100],type = "l")
+lines(simulout2[1:100],col = "red")
 
 #####################################################################################################x
 

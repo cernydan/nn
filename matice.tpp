@@ -214,3 +214,45 @@ void Matice<T>::rand_vypln(double min, double max){
         }
     }
 }
+
+
+template<typename T>
+void Matice<T>::resize(size_t radky, size_t sloupce){
+    for (size_t i = 0; i < rows; ++i) {
+        delete[] dta[i];
+    }
+    delete[] dta;
+
+    rows = radky;
+    cols = sloupce;
+    dta = new T*[rows];
+    for (size_t i = 0; i < rows; ++i) {
+        dta[i] = new T[cols]();
+    }
+}
+
+template<typename T>
+void Matice<T>::o180_nuly(size_t layers) {
+    size_t new_rows = rows + 2 * layers;
+    size_t new_cols = cols + 2 * layers;
+
+    T** new_dta = new T*[new_rows];
+    for (size_t i = 0; i < new_rows; ++i) {
+        new_dta[i] = new T[new_cols]();
+    }
+
+    for (size_t i = 0; i < rows; ++i) {
+        for (size_t j = 0; j < cols; ++j) {
+            new_dta[new_rows - layers - 1 - i][new_cols - layers - 1 - j] = dta[i][j];
+        }
+    }
+
+    for (size_t i = 0; i < rows; ++i) {
+        delete[] dta[i];
+    }
+    delete[] dta;
+
+    rows = new_rows;
+    cols = new_cols;
+    dta = new_dta;
+}

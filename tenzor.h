@@ -36,6 +36,8 @@ public:
     void add_matrix(const Matice<T>& matice);
     void set_matrix(size_t depth, const Matice<T>& matice);
     void rand_vypln(double min, double max);
+    void flip180();
+    void obal_nul(size_t layers);
     
 };
 

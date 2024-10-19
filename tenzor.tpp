@@ -271,3 +271,51 @@ void Tenzor<T>::rand_vypln(double min, double max){
     }
 }
 
+template<typename T>
+void Tenzor<T>::flip180() {
+    for (size_t d = 0; d < depth; ++d) {
+        for (size_t r = 0; r < rows / 2; ++r) {
+            for (size_t c = 0; c < cols; ++c) {
+                std::swap(dta[d][r][c], dta[d][rows - 1 - r][cols - 1 - c]);
+            }
+        }
+        if (rows % 2 != 0) {
+            size_t middle_row = rows / 2;
+            for (size_t c = 0; c < cols / 2; ++c) {
+                std::swap(dta[d][middle_row][c], dta[d][middle_row][cols - 1 - c]);
+            }
+        }
+    }
+}
+
+template<typename T>
+void Tenzor<T>::obal_nul(size_t layers) {
+    size_t new_rows = rows + 2 * layers;
+    size_t new_cols = cols + 2 * layers;
+
+    T*** new_dta = new T**[depth];
+    for (size_t d = 0; d < depth; ++d) {
+        new_dta[d] = new T*[new_rows];
+        for (size_t r = 0; r < new_rows; ++r) {
+            new_dta[d][r] = new T[new_cols];
+            for (size_t c = 0; c < new_cols; ++c) {
+                if (r < layers || r >= rows + layers || c < layers || c >= cols + layers) {
+                    new_dta[d][r][c] = 0;
+                } else {
+                    new_dta[d][r][c] = dta[d][r - layers][c - layers];
+                }
+            }
+        }
+    }
+    for (size_t d = 0; d < depth; ++d) {
+        for (size_t r = 0; r < rows; ++r) {
+            delete[] dta[d][r];
+        }
+        delete[] dta[d];
+    }
+    delete[] dta;
+
+    rows = new_rows;
+    cols = new_cols;
+    dta = new_dta;
+}

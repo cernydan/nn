@@ -38,15 +38,15 @@ public:
     std::vector<std::vector<double>> test_data;
     std::vector<std::vector<double>> val_data;
     
-    Matice<double> set_kernel_rand(size_t radky, size_t sloupce);
     Matice<double> max_pool(Matice<double> vstupnim, size_t oknorad, size_t oknosl);
     Matice<double> avg_pool(Matice<double> vstupnim, size_t oknorad, size_t oknosl);
     Matice<double> konvo(Matice<double> vstupnim, Matice<double> vstupkernel);
+    Matice<double> konvo_fullstep(Matice<double> vstupnim, Matice<double> vstupkernel);
+    Tenzor<double> konvo_fullstep_3d(Tenzor<double> vstupnt, Tenzor<double> vstupker);
     std::vector<double> vstupni_cr;
     std::vector<Matice<double>> kernely_v2d;
-    std::vector<Matice<double>> dataprocnn_v2d;
 
-    Tenzor<double> dataprocnn_t;
+    Matice<double> dataprocnn;
     Tenzor<double> kernely_t;
 
     void print_vystup();
@@ -70,10 +70,10 @@ public:
     void shuffle_train();
 
     void set_vstup_rada(const std::vector<double>& inputs);
-    void udelej_radky(size_t velrad, bool tenzor);
-    void udelej_lag(size_t lag, bool tenzor);
-    void udelej_api(int n, double beta, Co coze, int kolik, bool tenzor);
-    void udelej_prumery(int n, Co coze, int kolik, bool tenzor);
+    Matice<double> udelej_radky(size_t velrad);
+    Matice<double> udelej_lag(size_t lag);
+    Matice<double> udelej_api(int n, double beta, Co coze, int kolik);
+    Matice<double> udelej_prumery(int n, Co coze, int kolik);
     double tanh(double x);
 
     
