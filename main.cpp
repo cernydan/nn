@@ -46,12 +46,11 @@ int main() {
 
     auto start = high_resolution_clock::now();
 
-    Tenzor<double> ab(4,10,10);
-    Tenzor<double> db(6,5,5);
-    ab.rand_vypln(0,1);
-    db.rand_vypln(1,2);
-    NN sasa;
-    sasa.konvo_fullstep_3d(ab,db).printTenzor();
+    NN jarda;
+    std::vector<double>alois(10000);
+    jarda.set_vstup_rada(alois);
+    jarda.cnn_pokus();
+
 
 
 ///////////////LSTM ///////////////////////////////////////////
