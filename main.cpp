@@ -48,8 +48,11 @@ int main() {
 
     NN jarda;
     std::vector<double>alois(10000);
+    std::vector<double>jindra(100);
     jarda.set_vstup_rada(alois);
-    jarda.cnn_pokus();
+    jarda.set_chtenejout(jindra);
+    jarda.cnn_pokus(0);
+
 
 
 

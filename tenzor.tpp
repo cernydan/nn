@@ -186,6 +186,10 @@ void Tenzor<T>::set_matrix(size_t depth, const Matice<T>& matice) {
     
 }
 
+template<typename T>
+void Tenzor<T>::printRozmery() {
+    std::cout<<depth<<" "<<rows<<" "<<cols;
+}
 
 template<typename T>
 void Tenzor<T>::printTenzor() {
@@ -318,4 +322,38 @@ void Tenzor<T>::obal_nul(size_t layers) {
     rows = new_rows;
     cols = new_cols;
     dta = new_dta;
+}
+
+template<typename T>
+void Tenzor<T>::dilace(size_t row_pad, size_t col_pad) {
+    size_t new_rows = rows + (rows - 1) * row_pad; 
+    size_t new_cols = cols + (cols - 1) * col_pad;
+
+    T*** new_data = new T**[depth];
+    for (size_t d = 0; d < depth; ++d) {
+        new_data[d] = new T*[new_rows];
+        for (size_t r = 0; r < new_rows; ++r) {
+            new_data[d][r] = new T[new_cols]();
+        }
+    }
+
+    for (size_t d = 0; d < depth; ++d) {
+        for (size_t r = 0; r < rows; ++r) {
+            for (size_t c = 0; c < cols; ++c) {
+                new_data[d][r * (row_pad + 1)][c * (col_pad + 1)] = dta[d][r][c];
+            }
+        }
+    }
+
+    for (size_t d = 0; d < depth; ++d) {
+        for (size_t r = 0; r < rows; ++r) {
+            delete[] dta[d][r];
+        }
+        delete[] dta[d];
+    }
+    delete[] dta;
+
+    rows = new_rows;
+    cols = new_cols;
+    dta = new_data;
 }

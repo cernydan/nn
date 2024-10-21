@@ -43,6 +43,7 @@ public:
     Tenzor<double> max_pool_fullstep_3d(Tenzor<double> vstupnim, size_t oknorad, size_t oknosl);
     Matice<double> avg_pool(Matice<double> vstupnim, size_t oknorad, size_t oknosl);
     Matice<double> konvo(Matice<double> vstupnim, Matice<double> vstupkernel);
+    Tenzor<double> konvo_3d(Tenzor<double> vstupnim, Tenzor<double> vstupkernel);
     Matice<double> konvo_fullstep(Matice<double> vstupnim, Matice<double> vstupkernel);
     Tenzor<double> konvo_fullstep_3d(Tenzor<double> vstupnt, Tenzor<double> vstupker);
     std::vector<double> vstupni_cr;
@@ -64,7 +65,7 @@ public:
     void set_chtenejout(const std::vector<double>& obsout);
     void valid();
     void count_cost();
-    void cnn_pokus();
+    void cnn_pokus(int iter);
 
     void set_train_data(const std::vector<std::vector<double>>& datas);
     void set_val_data(const std::vector<std::vector<double>>& datas);

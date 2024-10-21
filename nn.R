@@ -128,4 +128,48 @@ LAG = 4
   error
 }
 
+##########################################x    CNN POKUS
+library(Rcpp)
+setwd("C:/Users/danek/Desktop/mlpR/vsnn")
+Rcpp::sourceCpp("rcppstuff.cpp")
+
+{
+cisloslozka <- "03"   ## číslo složky 01 až 18
+
+umisteni <- paste0("D:/testcamel/camel/basin_timeseries_v1p2_metForcing_obsFlow/basin_dataset_public_v1p2/usgs_streamflow/", cisloslozka)
+soubory <- list.files(umisteni, pattern = "_streamflow_qc.txt$", full.names = FALSE)
+cislasoubory <- data.frame(id = sub("_.*", "", soubory))
+cislasoubory
+
+poradisouboru <- 31
+
+Qcamel <- read.table(paste0("D:/testcamel/camel/basin_timeseries_v1p2_metForcing_obsFlow/basin_dataset_public_v1p2/usgs_streamflow/",
+                            cisloslozka, "/", as.character(cislasoubory$id[poradisouboru]),
+                            "_streamflow_qc.txt"), header=FALSE)
+VALScamel <- read.table(paste0("D:/testcamel/camel/basin_timeseries_v1p2_metForcing_obsFlow/basin_dataset_public_v1p2/basin_mean_forcing/nldas/",
+                               cisloslozka, "/", as.character(cislasoubory$id[poradisouboru]),
+                               "_lump_nldas_forcing_leap.txt"), header=FALSE, skip = 4)
+names(Qcamel) = c("ID","rok","mesic","den","Q","podm")
+##names(VALScamel) = c("rok", "mesic", "den", "delka dne asi[s]", "srazky [mm/den]", "")
+Qcamel <- Qcamel[,1:5]
+VALScamel <- VALScamel[1:length(Qcamel$Q),]
+Qcamel <- Qcamel[1:length(VALScamel$V1),]
+Qcamel$Q <- Qcamel$Q * 0.0283168466
+Rcamel <- VALScamel$V6
+
+Q <- (Qcamel$Q - min(Qcamel$Q))/(max(Qcamel$Q)-min(Qcamel$Q))
+}
+vstup <- Q[1:10000]
+chtenejout <- Q[10001:10100]
+
+mlp <- udelej_nn()
+nn_set_vstup_rada(mlp,vstup)
+nn_set_chtenejout(mlp,chtenejout)
+nn_cnn_pokus(mlp,300)
+simulout <- nn_get_vystupy(mlp)
+
+plot(simulout,type = "l")
+lines(simulout,col = "red")
+
+
 

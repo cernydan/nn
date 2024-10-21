@@ -33,11 +33,13 @@ public:
     void setElement(size_t depth, size_t row, size_t col, T value);
     void load_stdvv(const std::vector<std::vector<std::vector<T>>>& input);    // Načtení dat z std::v<std::v<std::v>>
     void printTenzor();
+    void printRozmery();
     void add_matrix(const Matice<T>& matice);
     void set_matrix(size_t depth, const Matice<T>& matice);
     void rand_vypln(double min, double max);
     void flip180();
     void obal_nul(size_t layers);
+    void dilace(size_t row_pad, size_t col_pad);
     
 };
 
