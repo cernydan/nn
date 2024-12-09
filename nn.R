@@ -157,18 +157,32 @@ Qcamel <- Qcamel[1:length(VALScamel$V1),]
 Qcamel$Q <- Qcamel$Q * 0.0283168466
 Rcamel <- VALScamel$V6
 
+Qcamel <- Qcamel[!(Qcamel$mesic == 2 & Qcamel$den == 29), ]   
+
 Q <- (Qcamel$Q - min(Qcamel$Q))/(max(Qcamel$Q)-min(Qcamel$Q))
 }
-vstup <- Q[1:10000]
-chtenejout <- Q[10001:10100]
+
+vstup_cal <- Q[1:3650]
+chtenejout_cal <- Q[2198:3657]
+
+vstup_val <- Q[3651:10950]
+chtenejout_val <- Q[5848:10957]
 
 mlp <- udelej_nn()
-nn_set_vstup_rada(mlp,vstup)
-nn_set_chtenejout(mlp,chtenejout)
-nn_cnn_pokus(mlp,300)
-simulout <- nn_get_vystupy(mlp)
+nn_init_nn(mlp,3,c(10,10,1))
+nn_set_vstup_rada(mlp,vstup_cal)
+nn_set_chtenejout(mlp,chtenejout_cal)
+nn_cnn_pokus_cal(mlp,7,10,10)
+simulout_cal <- nn_get_vystupy(mlp)
 
-plot(simulout,type = "l")
+nn_set_vstup_rada(mlp,vstup_val)
+nn_set_chtenejout(mlp,chtenejout_val)
+nn_cnn_pokus_val()
+simulout_val <- nn_get_vystupy(mlp)
+
+
+
+plot(chtenejout_cal,type = "l")
 lines(simulout,col = "red")
 
 

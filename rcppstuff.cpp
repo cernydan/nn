@@ -103,8 +103,13 @@ void nn_online_bp_adam(Rcpp::XPtr<NN> nn,int iters){
 }
 
 //[[Rcpp::export]]
-void nn_cnn_pokus(Rcpp::XPtr<NN> nn,int iters){
-    nn->cnn_pokus(iters);
+void nn_cnn_pokus_cal(Rcpp::XPtr<NN> nn,size_t vel_ker, size_t poc_ker,int iters){
+    nn->cnnonfly_cal(vel_ker, poc_ker, iters);
+}
+
+//[[Rcpp::export]]
+void nn_cnn_pokus_val(Rcpp::XPtr<NN> nn){
+    nn->cnnonfly_val();
 }
 
 //[[Rcpp::export]]

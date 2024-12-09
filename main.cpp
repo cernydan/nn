@@ -46,13 +46,10 @@ int main() {
 
     auto start = high_resolution_clock::now();
 
-    NN jarda;
-    std::vector<double>alois(10000);
-    std::vector<double>jindra(100);
-    jarda.set_vstup_rada(alois);
-    jarda.set_chtenejout(jindra);
-    jarda.cnn_pokus(0);
-
+    Tenzor<double> jhkl(3,5,6);
+    jhkl.printTenzor();
+    jhkl.resize(1,8,8);
+    jhkl.printTenzor();
 
 
 

@@ -256,3 +256,36 @@ void Matice<T>::o180_nuly(size_t layers) {
     cols = new_cols;
     dta = new_dta;
 }
+
+template<typename T>
+void Matice<T>::sloupce_nakonec(size_t pocet_sloupcu) {
+    if (pocet_sloupcu > cols) {
+        throw std::invalid_argument("Počet sloupců, které mají být přidány, je větší než počet existujících sloupců.");
+    }
+
+    size_t new_cols = cols + pocet_sloupcu;
+
+    // Vytvořit novou matici s aktualizovanými rozměry
+    T** new_dta = new T*[rows];
+    for (size_t i = 0; i < rows; ++i) {
+        new_dta[i] = new T[new_cols];
+        // Zkopírovat stávající sloupce
+        for (size_t j = 0; j < cols; ++j) {
+            new_dta[i][j] = dta[i][j];
+        }
+        // Přidat požadované sloupce na konec s posunem
+        for (size_t j = 0; j < pocet_sloupcu; ++j) {
+            new_dta[i][cols + j] = dta[(i + 1) % rows][j]; // Posunutí řádků
+        }
+    }
+
+    // Uvolnit starou paměť
+    for (size_t i = 0; i < rows; ++i) {
+        delete[] dta[i];
+    }
+    delete[] dta;
+
+    // Aktualizovat ukazatel, počet sloupců a přidělená data
+    dta = new_dta;
+    cols = new_cols;
+}

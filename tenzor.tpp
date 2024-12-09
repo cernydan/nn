@@ -357,3 +357,32 @@ void Tenzor<T>::dilace(size_t row_pad, size_t col_pad) {
     cols = new_cols;
     dta = new_data;
 }
+
+template<typename T>
+void Tenzor<T>::resize(size_t hloubka, size_t radky, size_t sloupce) {
+    // Uvolnění staré paměti
+    if (dta != nullptr) {
+        for (size_t i = 0; i < depth; ++i) {
+            for (size_t j = 0; j < rows; ++j) {
+                delete[] dta[i][j];
+            }
+            delete[] dta[i];
+        }
+        delete[] dta;
+    }
+
+    // Nastavení nových rozměrů
+    depth = hloubka;
+    rows = radky;
+    cols = sloupce;
+
+    // Alokace nové paměti
+    dta = new T**[depth];
+    for (size_t i = 0; i < depth; ++i) {
+        dta[i] = new T*[rows];
+        for (size_t j = 0; j < rows; ++j) {
+            dta[i][j] = new T[cols]();
+        }
+    }
+}
+

@@ -39,6 +39,7 @@ public:
     void rand_vypln(double min, double max);
     void resize(size_t radky, size_t sloupce);
     void o180_nuly(size_t layers);
+    void sloupce_nakonec(size_t pocet_sloupcu);
 
     
 };

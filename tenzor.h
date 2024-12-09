@@ -40,6 +40,7 @@ public:
     void flip180();
     void obal_nul(size_t layers);
     void dilace(size_t row_pad, size_t col_pad);
+    void resize(size_t hloubka, size_t radky, size_t sloupce);
     
 };
 

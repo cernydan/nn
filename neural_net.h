@@ -79,7 +79,9 @@ public:
     Matice<double> udelej_prumery(int n, Co coze, int kolik);
     double tanh(double x);
 
-    
+    void cnnonfly_cal(size_t vel_ker, size_t poc_ker, int iter);
+    void cnnonfly_val();
+    Tenzor<double> kernely_onfly;
 
 };
 
