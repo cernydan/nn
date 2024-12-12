@@ -61,11 +61,11 @@ Qcamel <- Qcamel[1:length(VALScamel$V1),]
 Qcamel$Q <- Qcamel$Q * 0.0283168466
 Rcamel <- VALScamel$V6
 
-Qkal = Qcamel$Q[1:9000]
-Qval = Qcamel$Q[9001:12000]
+Qkal = Qcamel$Q[1:3000]
+Qval = Qcamel$Q[3001:12000]
 
 LAG = 5
-pn = 1
+pn = 50
 {
 dt = matrix(0, nrow = (length(Qkal)-LAG), ncol = LAG )
 for (i in 1:LAG){ dt[,i] = Qkal[(LAG-i+1):(length(Qkal)-i)] }
@@ -80,8 +80,8 @@ nn_set_chtenejout(mlp,chtenejout)
 nn_set_traindata(mlp,dt)
 #nn_shuffle_train(mlp)
 #nn_print_data(mlp)
-nn_init_nn(mlp,LAG,c(pn,1))
-nn_online_bp_adam(mlp,50)
+nn_init_nn(mlp,LAG,c(pn,pn,1))
+nn_online_bp_adam(mlp,30)
 simulout <- nn_get_vystupy(mlp)
 nn_set_valdata(mlp,dt2)
 nn_valid(mlp)
@@ -141,7 +141,7 @@ soubory <- list.files(umisteni, pattern = "_streamflow_qc.txt$", full.names = FA
 cislasoubory <- data.frame(id = sub("_.*", "", soubory))
 cislasoubory
 
-poradisouboru <- 31
+poradisouboru <- 11
 
 Qcamel <- read.table(paste0("D:/testcamel/camel/basin_timeseries_v1p2_metForcing_obsFlow/basin_dataset_public_v1p2/usgs_streamflow/",
                             cisloslozka, "/", as.character(cislasoubory$id[poradisouboru]),
@@ -162,28 +162,90 @@ Qcamel <- Qcamel[!(Qcamel$mesic == 2 & Qcamel$den == 29), ]
 Q <- (Qcamel$Q - min(Qcamel$Q))/(max(Qcamel$Q)-min(Qcamel$Q))
 }
 
-vstup_cal <- Q[1:3650]
-chtenejout_cal <- Q[2198:3657]
+ker = 7
+poc_ker = 30
+roky_cal = 25
+roky_val = 20
+
+vstup_cal <- Q[1:(roky_cal*365)]
+chtenejout_cal <- Q[((ker-1)*365+ker+1):(365*roky_cal+ker)]
+
+mlp <- udelej_nn()
+nn_init_nn(mlp,poc_ker,c(poc_ker,poc_ker,1))
+nn_set_vstup_rada(mlp,vstup_cal)
+nn_set_chtenejout(mlp,chtenejout_cal)
+nn_cnn_pokus_cal(mlp,ker,poc_ker,50)
+simulout_cal <- nn_get_vystupy(mlp)
+
+plot(chtenejout_cal,type = "l")
+lines(simulout_cal,col = "red")
 
 vstup_val <- Q[3651:10950]
 chtenejout_val <- Q[5848:10957]
 
-mlp <- udelej_nn()
-nn_init_nn(mlp,3,c(10,10,1))
-nn_set_vstup_rada(mlp,vstup_cal)
-nn_set_chtenejout(mlp,chtenejout_cal)
-nn_cnn_pokus_cal(mlp,7,10,10)
-simulout_cal <- nn_get_vystupy(mlp)
-
 nn_set_vstup_rada(mlp,vstup_val)
 nn_set_chtenejout(mlp,chtenejout_val)
-nn_cnn_pokus_val()
+nn_cnn_pokus_val(mlp)
 simulout_val <- nn_get_vystupy(mlp)
 
+plot(chtenejout_val,type = "l")
+lines(simulout_val,col = "red")
 
 
-plot(chtenejout_cal,type = "l")
-lines(simulout,col = "red")
+x = 1
+vystupy = list()
+
+for(i in 1:3){
+  for(j in 1:4){
+    for(k in 1:3){
+      print(x)
+      
+      ker = 7
+      poc_ker = i*10
+      roky_cal = 5+5*j
+      
+      
+      vstup_cal <- Q[1:(roky_cal*365)]
+      chtenejout_cal <- Q[((ker-1)*365+ker+1):(365*roky_cal+ker)]
+      
+      mlp <- udelej_nn()
+      nn_init_nn(mlp,poc_ker,c(poc_ker,poc_ker,1))
+      nn_set_vstup_rada(mlp,vstup_cal)
+      nn_set_chtenejout(mlp,chtenejout_cal)
+      nn_cnn_pokus_cal(mlp,ker,poc_ker,(50*k))
+      vystupy[[x]] <- nn_get_vystupy(mlp)
+      x=x+1
+    }
+  }
+}
+vystupy
+
+
+# Nastavení složky, kam se obrázky uloží
+output_folder <- "C:/Users/danek/Desktop/grafy"
+
+# Iterace přes list a uložení grafů
+for (i in seq_along(vystupy)) {
+
+  
+  # Vytvoření cesty pro uložení souboru
+  file_path <- file.path(output_folder, paste0(i, ".png"))
+  
+  # Uložení grafu jako PNG
+
+  png(file_path, width = 800, height = 600) # Nastavení výstupního souboru
+  plot.new()
+  plot(
+    chtenejout_cal,
+    type = "l",
+    col = "black",
+
+  )
+  lines(vystupy[[i]],col = "red")
+  dev.off() # Ukončení záznamu do souboru
+}
+
+
 
 
 

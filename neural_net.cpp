@@ -613,7 +613,16 @@ void NN::cnnonfly_cal(size_t vel_ker, size_t poc_ker, int iter){
     dataprocnn = udelej_radky(rok);
     dataprocnn.sloupce_nakonec(vel_ker - 1);
     kernely_onfly.resize(poc_ker,vel_ker,vel_ker);
-    kernely_onfly.rand_vypln(-0.3,0.3);
+    kernely_onfly.rand_vypln(-0.3,0.9);
+
+// for(int i = 0; i<kernely_onfly.getDepth();i++){
+//    for(int j = 0; j<kernely_onfly.getRows();j++){
+//     for(int k = 0; k<kernely_onfly.getCols();k++){
+//         kernely_onfly.setElement(i,j,k,(0.1+k*0.01+j*0.05));
+// }
+// } 
+// }
+
     Tenzor<double> akt_vstup(1,vel_ker,vel_ker);
     Tenzor<double> deltazmlp(1,1,1);
     Tenzor<double> uprava_k(poc_ker,vel_ker,vel_ker);
@@ -622,14 +631,14 @@ void NN::cnnonfly_cal(size_t vel_ker, size_t poc_ker, int iter){
 
 //////////////////////////////////////////////////////////// KALIBRACE //////////////////////////////////////////////////////
     for(int m = 0; m < iter; m++){
-
+        std::cout<<m<<"\n";
         for(int roky = 0; roky < (dataprocnn.getRows() - (vel_ker - 1)); roky++){
             for(int dny = 0; dny < rok ; dny++){
 
 //// KONVOLUCE //////////////////////////////////////////////////////////////////////////////////////////////////////////////                
                 for(int i = 0; i < vel_ker; i++){
                     for(int j = 0; j < vel_ker; j++){
-                        akt_vstup.setElement(0,i,j,dataprocnn.getElement(i+dny,j+roky));
+                        akt_vstup.setElement(0,i,j,dataprocnn.getElement(i+roky,j+dny));
                     }
                 }
 
@@ -642,7 +651,7 @@ void NN::cnnonfly_cal(size_t vel_ker, size_t poc_ker, int iter){
 //// MLP //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 pom_vystup.clear();
                 for (int i = 0; i < rozmery[0]; ++i) {
-                    sit[0][i].set_vstupy (vystzkonv);
+                    sit[0][i].set_vstupy(vystzkonv);
                     sit[0][i].vypocet();
                     pom_vystup.push_back(sit[0][i].o);
                 }
@@ -660,45 +669,37 @@ void NN::cnnonfly_cal(size_t vel_ker, size_t poc_ker, int iter){
 
 //// MLP BACKPROP ////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 sit[pocet_vrstev-1][rozmery[pocet_vrstev-1]-1].delta = pom_vystup[0] - chtenejout[roky*rok+dny];
-                for (int i=0;i<rozmery[pocet_vrstev-2];++i){
-                    sit[pocet_vrstev-2][i].delta = sit[pocet_vrstev-2][i].der_akt_fun(sit[pocet_vrstev-2][i].a)*(sit[pocet_vrstev-1][rozmery[pocet_vrstev-1]-1].vahy[i] * sit[pocet_vrstev-1][rozmery[pocet_vrstev-1]-1].delta);
-                }
 
-                for(int j = (pocet_vrstev-3); j>=0;--j){
-                    for (int i=0;i<rozmery[j];++i){
-                        double skalsoucprv = 0.0;
-                        for(int k = 0;k<rozmery[j+1];++k){
-                            skalsoucprv += sit[j+1][k].vahy[i] * sit[j+1][k].delta;
-                        }
-                
-                        sit[j][i].delta = sit[j][i].der_akt_fun(sit[j][i].a)*skalsoucprv;
-                    }
-                }
+        for (int i=0;i<rozmery[pocet_vrstev-2];++i){
+            sit[pocet_vrstev-2][i].delta = sit[pocet_vrstev-2][i].der_akt_fun(sit[pocet_vrstev-2][i].a)*(sit[pocet_vrstev-1][rozmery[pocet_vrstev-1]-1].vahy[i] * sit[pocet_vrstev-1][rozmery[pocet_vrstev-1]-1].delta);
+         }
 
-                for(int i = 0;i<pocet_vrstev;++i){
-                    for(int j = 0;j<rozmery[i];++j){
-                        for(int k = 0; k < sit[i][j].vahy.size();++k){
-                            sit[i][j].Mt[k] = beta*sit[i][j].Mt[k]+(1-beta)*(sit[i][j].delta * sit[i][j].vstupy[k]);
-                            sit[i][j].Vt[k] = beta2*sit[i][j].Vt[k]+(1-beta2)*pow((sit[i][j].delta * sit[i][j].vstupy[k]),2);
-                            sit[i][j].Mt_s[k] = sit[i][j].Mt[k]/(1-pow(beta,(m+1)));
-                            sit[i][j].Vt_s[k] = sit[i][j].Vt[k]/(1-pow(beta2,(m+1)));
-
-                    
-                            sit[i][j].vahy[k] = sit[i][j].vahy[k] - alfa * sit[i][j].Mt_s[k]/(sqrt(sit[i][j].Vt_s[k])+epsi);
-                        }
-                    }              
+        for(int j = (pocet_vrstev-3); j>=0;--j){
+            for (int i=0;i<rozmery[j];++i){
+                 double skalsoucprv = 0.0;
+                for(int k = 0;k<rozmery[j+1];++k){
+                    skalsoucprv += sit[j+1][k].vahy[i] * sit[j+1][k].delta;
                 }
+            
+            sit[j][i].delta = sit[j][i].der_akt_fun(sit[j][i].a)*skalsoucprv;
+        }
+    }
+
+    for(int i = 0;i<pocet_vrstev;++i){
+        for(int j = 0;j<rozmery[i];++j){
+            for(int k = 0; k < sit[i][j].vahy.size();++k)
+                sit[i][j].vahy[k] = sit[i][j].vahy[k] - alfa * sit[i][j].delta * sit[i][j].vstupy[k];
+        }
+    }
 
 //// CNN BACKPROP ////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 for (int neur = 0;neur<rozmery[0];++neur){
                     deltazmlp.setElement(0,0,0,sit[0][neur].delta);
-
                     uprava_k = konvo_3d(akt_vstup,deltazmlp); 
-
-                    for(int upr = 0;upr<uprava_k.getDepth();++upr){
+                    for(int upr = 0;upr<kernely_onfly.getDepth();++upr){
                         for(int sl = 0; sl<kernely_onfly.getCols();++sl){
                             for(int rad = 0;rad<kernely_onfly.getRows();++rad){
-                                kernely_onfly.setElement(upr,rad,sl,kernely_onfly.getElement(upr,rad,sl)-alfa*uprava_k.getElement(upr,rad,sl));
+                                kernely_onfly.setElement(upr,rad,sl,kernely_onfly.getElement(upr,rad,sl)-alfa*uprava_k.getElement(0,rad,sl));
                             }
                         }
                     }
@@ -715,7 +716,7 @@ void NN::cnnonfly_cal(size_t vel_ker, size_t poc_ker, int iter){
 //// KONVOLUCE //////////////////////////////////////////////////////////////////////////////////////////////////////////////                
                 for(int i = 0; i < vel_ker; i++){
                     for(int j = 0; j < vel_ker; j++){
-                        akt_vstup.setElement(0,i,j,dataprocnn.getElement(i+dny,j+roky));
+                        akt_vstup.setElement(0,i,j,dataprocnn.getElement(i+roky,j+dny));
                     }
                 }
 
@@ -746,6 +747,7 @@ void NN::cnnonfly_cal(size_t vel_ker, size_t poc_ker, int iter){
             vystupy.push_back(pom_vystup[0]);    
             }           
         }
+        sit[pocet_vrstev-1][rozmery[pocet_vrstev-1]-1].print_neuron();
     }
 
 void NN::cnnonfly_val(){
@@ -764,7 +766,7 @@ void NN::cnnonfly_val(){
 //// KONVOLUCE //////////////////////////////////////////////////////////////////////////////////////////////////////////////                
                 for(int i = 0; i < vel_ker; i++){
                     for(int j = 0; j < vel_ker; j++){
-                        akt_vstup.setElement(0,i,j,dataprocnn.getElement(i+dny,j+roky));
+                        akt_vstup.setElement(0,i,j,dataprocnn.getElement(i+roky,j+dny));
                     }
                 }
 

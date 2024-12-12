@@ -46,11 +46,6 @@ int main() {
 
     auto start = high_resolution_clock::now();
 
-    Tenzor<double> jhkl(3,5,6);
-    jhkl.printTenzor();
-    jhkl.resize(1,8,8);
-    jhkl.printTenzor();
-
 
 
 ///////////////LSTM ///////////////////////////////////////////

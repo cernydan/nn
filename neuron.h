@@ -27,7 +27,7 @@ public:
     double a;
     double delta;
     bool bias;
-    enum {sigmoid,linear,leakyrelu,tanh} aktfunkce;
+    enum {sigmoid,linear,leakyrelu,tanh,relu} aktfunkce;
     std::vector<double> Mt;
     std::vector<double> Mt_s;
     std::vector<double> Vt;

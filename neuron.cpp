@@ -11,7 +11,7 @@ Neuron::Neuron()    //konstruktor
     o = 0.0;
     delta = 0.0;
     bias = true;
-    aktfunkce = sigmoid;
+    aktfunkce = relu;
     Mt.clear();
     Mt_s.clear();
     Vt.clear();
@@ -168,6 +168,14 @@ void Neuron::vypocet() {
         o = a;
         break;
 
+        case relu:
+
+        if(0.0>a){
+            o = 0.0;
+        } else{
+            o = a;
+        }
+
         case leakyrelu:
         if((0.01*a)>a){
             o = 0.01*a;
@@ -215,6 +223,13 @@ double Neuron::der_akt_fun(double aktiv){
                 return 1.0;
             }
         
+        case relu:
+            if(aktiv<0.0){ 
+                return 0.0;
+            } else {
+                return 1.0;
+            }
+
         case tanh:
             return (1-pow(((exp(aktiv)-exp(-aktiv))/(exp(aktiv)+exp(-aktiv))),2));
 
