@@ -11,7 +11,7 @@ Neuron::Neuron()    //konstruktor
     o = 0.0;
     delta = 0.0;
     bias = true;
-    aktfunkce = relu;
+    aktfunkce = sigmoid;
     Mt.clear();
     Mt_s.clear();
     Vt.clear();
@@ -134,14 +134,14 @@ void Neuron::set_randomvahy(){
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dis(-0.3, 0.3);
 
-    vahy.clear();
-    for (int i = 0; i < vstupy.size(); ++i) {
-        vahy.push_back(dis(gen));
-        Mt.push_back(0.0);
-        Mt_s.push_back(0.0);
-        Vt.push_back(0.0);
-        Vt_s.push_back(0.0);
-    }
+         vahy.clear();
+        for (int i = 0; i < vstupy.size(); ++i) {
+            vahy.push_back(dis(gen));
+            Mt.push_back(0.0);
+            Mt_s.push_back(0.0);
+            Vt.push_back(0.0);
+            Vt_s.push_back(0.0);
+        }
 }
 
 void Neuron::set_rucovahy(const std::vector<double>& weights){
@@ -175,6 +175,7 @@ void Neuron::vypocet() {
         } else{
             o = a;
         }
+        break;
 
         case leakyrelu:
         if((0.01*a)>a){
@@ -182,6 +183,7 @@ void Neuron::vypocet() {
         } else{
             o = a;
         }
+        break;
 
         case tanh:
         o = (exp(a)-exp(-a))/(exp(a)+exp(-a));

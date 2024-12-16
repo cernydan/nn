@@ -38,7 +38,7 @@ setwd("C:/Users/danek/Desktop/mlpR/vsnn")
 
 Rcpp::sourceCpp("rcppstuff.cpp")
 
-cisloslozka <- "03"   ## číslo složky 01 až 18
+{cisloslozka <- "18"   ## číslo složky 01 až 18
 
 umisteni <- paste0("D:/testcamel/camel/basin_timeseries_v1p2_metForcing_obsFlow/basin_dataset_public_v1p2/usgs_streamflow/", cisloslozka)
 soubory <- list.files(umisteni, pattern = "_streamflow_qc.txt$", full.names = FALSE)
@@ -61,11 +61,14 @@ Qcamel <- Qcamel[1:length(VALScamel$V1),]
 Qcamel$Q <- Qcamel$Q * 0.0283168466
 Rcamel <- VALScamel$V6
 
-Qkal = Qcamel$Q[1:3000]
-Qval = Qcamel$Q[3001:12000]
+Q <- (Qcamel$Q - min(Qcamel$Q))/(max(Qcamel$Q)-min(Qcamel$Q))
+
+Qkal = Q[1:3000]
+Qval = Q[3001:12000]
+}
 
 LAG = 5
-pn = 50
+pn = 10
 {
 dt = matrix(0, nrow = (length(Qkal)-LAG), ncol = LAG )
 for (i in 1:LAG){ dt[,i] = Qkal[(LAG-i+1):(length(Qkal)-i)] }
@@ -81,7 +84,7 @@ nn_set_traindata(mlp,dt)
 #nn_shuffle_train(mlp)
 #nn_print_data(mlp)
 nn_init_nn(mlp,LAG,c(pn,pn,1))
-nn_online_bp_adam(mlp,30)
+nn_online_bp_adam(mlp,25)
 simulout <- nn_get_vystupy(mlp)
 nn_set_valdata(mlp,dt2)
 nn_valid(mlp)
@@ -90,8 +93,6 @@ nn_set_chtenejout(mlp,chtenejout)
 
 plot(c(Qkal,Qval),type = "l")
 lines(c(simulout,simulout2),col = "red")
-error <- nn_count_cost(mlp)
-error
 }
 plot(Qval[1:100],type = "l")
 lines(simulout2[1:100],col = "red")
@@ -163,8 +164,8 @@ Q <- (Qcamel$Q - min(Qcamel$Q))/(max(Qcamel$Q)-min(Qcamel$Q))
 }
 
 ker = 7
-poc_ker = 30
-roky_cal = 25
+poc_ker = 40
+roky_cal = 15
 roky_val = 20
 
 vstup_cal <- Q[1:(roky_cal*365)]
@@ -174,11 +175,14 @@ mlp <- udelej_nn()
 nn_init_nn(mlp,poc_ker,c(poc_ker,poc_ker,1))
 nn_set_vstup_rada(mlp,vstup_cal)
 nn_set_chtenejout(mlp,chtenejout_cal)
-nn_cnn_pokus_cal(mlp,ker,poc_ker,50)
+nn_cnn_pokus_cal(mlp,ker,poc_ker,200)
 simulout_cal <- nn_get_vystupy(mlp)
 
 plot(chtenejout_cal,type = "l")
 lines(simulout_cal,col = "red")
+
+plot(chtenejout_cal[550:850],type = "l",ylim = c(0.1,0.3))
+lines(simulout_cal[550:850],col = "red")
 
 vstup_val <- Q[3651:10950]
 chtenejout_val <- Q[5848:10957]

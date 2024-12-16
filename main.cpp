@@ -46,7 +46,11 @@ int main() {
 
     auto start = high_resolution_clock::now();
 
-
+    Neuron pepa;
+    pepa.set_vstupy({1.0,2.0,3.0,1.0,2.0,3.0,1.0,2.0,3.0,1.0,2.0,3.0,1.0,2.0,3.0});
+    pepa.set_randomvahy();
+    pepa.vypocet();
+    pepa.print_neuron();
 
 ///////////////LSTM ///////////////////////////////////////////
     // NN abcde;

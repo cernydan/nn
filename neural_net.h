@@ -66,6 +66,7 @@ public:
     void valid();
     void count_cost();
     void cnn_pokus(int iter);
+    void cnn1D_cal(size_t vel_ker, size_t poc_ker, int iter);
 
     void set_train_data(const std::vector<std::vector<double>>& datas);
     void set_val_data(const std::vector<std::vector<double>>& datas);
@@ -82,7 +83,10 @@ public:
     void cnnonfly_cal(size_t vel_ker, size_t poc_ker, int iter);
     void cnnonfly_val();
     Tenzor<double> kernely_onfly;
-
+    Tenzor<double> kernely_1D;
+    std::vector<double> Q_kal_vstup;
+    std::vector<double> R_kal_vstup;
+    std::vector<double> T_kal_vstup;
 };
 
 #endif // NEURAL_NET_H
