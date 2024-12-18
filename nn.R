@@ -68,7 +68,7 @@ Qval = Q[3001:12000]
 }
 
 LAG = 5
-pn = 10
+pn = 50
 {
 dt = matrix(0, nrow = (length(Qkal)-LAG), ncol = LAG )
 for (i in 1:LAG){ dt[,i] = Qkal[(LAG-i+1):(length(Qkal)-i)] }
@@ -84,7 +84,7 @@ nn_set_traindata(mlp,dt)
 #nn_shuffle_train(mlp)
 #nn_print_data(mlp)
 nn_init_nn(mlp,LAG,c(pn,pn,1))
-nn_online_bp_adam(mlp,25)
+nn_online_bp_adam(mlp,10)
 simulout <- nn_get_vystupy(mlp)
 nn_set_valdata(mlp,dt2)
 nn_valid(mlp)
@@ -94,8 +94,8 @@ nn_set_chtenejout(mlp,chtenejout)
 plot(c(Qkal,Qval),type = "l")
 lines(c(simulout,simulout2),col = "red")
 }
-plot(Qval[1:100],type = "l")
-lines(simulout2[1:100],col = "red")
+plot(Qval[1:300],type = "l")
+lines(simulout2[1:300],col = "red")
 
 #####################################################################################################x
 
@@ -164,8 +164,8 @@ Q <- (Qcamel$Q - min(Qcamel$Q))/(max(Qcamel$Q)-min(Qcamel$Q))
 }
 
 ker = 7
-poc_ker = 40
-roky_cal = 15
+poc_ker = 20
+roky_cal = 20
 roky_val = 20
 
 vstup_cal <- Q[1:(roky_cal*365)]
@@ -175,7 +175,7 @@ mlp <- udelej_nn()
 nn_init_nn(mlp,poc_ker,c(poc_ker,poc_ker,1))
 nn_set_vstup_rada(mlp,vstup_cal)
 nn_set_chtenejout(mlp,chtenejout_cal)
-nn_cnn_pokus_cal(mlp,ker,poc_ker,200)
+nn_cnn_pokus_cal(mlp,ker,poc_ker,50)
 simulout_cal <- nn_get_vystupy(mlp)
 
 plot(chtenejout_cal,type = "l")

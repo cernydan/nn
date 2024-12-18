@@ -11,7 +11,7 @@ Neuron::Neuron()    //konstruktor
     o = 0.0;
     delta = 0.0;
     bias = true;
-    aktfunkce = sigmoid;
+    aktfunkce = leakyrelu;
     Mt.clear();
     Mt_s.clear();
     Vt.clear();
@@ -132,7 +132,7 @@ void Neuron::set_vstupy(const std::vector<double>& inputs) {
 void Neuron::set_randomvahy(){
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_real_distribution<> dis(-0.3, 0.3);
+    std::uniform_real_distribution<> dis(0.0, 0.1);
 
          vahy.clear();
         for (int i = 0; i < vstupy.size(); ++i) {
