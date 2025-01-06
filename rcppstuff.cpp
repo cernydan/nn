@@ -87,15 +87,8 @@ void nn_online_bp(Rcpp::XPtr<NN> nn,int iters){
     nn->online_bp(iters);
 }
 
-//[[Rcpp::export]]
-void nn_online_bp_th(Rcpp::XPtr<NN> nn,int iters){
-    nn->online_bp_th(iters);
-}
 
-//[[Rcpp::export]]
-void lstm_1cell(Rcpp::XPtr<NN> nn,int batch_size,int iters){
-    nn->lstm_1cell(batch_size,iters);
-}
+
 
 //[[Rcpp::export]]
 void nn_online_bp_adam(Rcpp::XPtr<NN> nn,int iters){
@@ -155,52 +148,11 @@ double nn_count_cost(Rcpp::XPtr<NN> nn){
     return nn->cost;
 }
 
-//[[Rcpp::export]]
-void nn_set_vstup_rada(Rcpp::XPtr<NN> nn, Rcpp::NumericVector input_cr){
-    std::vector<double> input_cr_c = Rcpp::as<std::vector<double>>(input_cr);
-    nn->set_vstup_rada(input_cr_c);
-}
-
-// [[Rcpp::export]]
-void nn_udelej_radky(Rcpp::XPtr<NN> nn, size_t velrad){
-    nn->udelej_radky(velrad);
-}
-
-// [[Rcpp::export]]
-void nn_udelej_lag(Rcpp::XPtr<NN> nn, size_t lag){
-    nn->udelej_lag(lag);
-}
-
-// [[Rcpp::export]]
-void nn_udelej_api(Rcpp::XPtr<NN> nn,int n, double beta, int coze, int kolik) {
-
-  NN::Co coze_enum;
-  if (coze == 0) {
-    coze_enum = NN::radky;
-  } else if (coze == 1) {
-    coze_enum = NN::lag;
-  } else {
-    Rcpp::stop("Neplatná hodnota pro 'coze'");
-  }
-  
-  nn->udelej_api(n, beta, coze_enum, kolik);
-}
-
-// [[Rcpp::export]]
-void nn_udelej_prumery(Rcpp::XPtr<NN> nn, int n, int coze, int kolik) {
-
-  NN::Co coze_enum;
-  if (coze == 0) {
-    coze_enum = NN::radky;
-  } else if (coze == 1) {
-    coze_enum = NN::lag;
-  } else {
-    Rcpp::stop("Neplatná hodnota pro 'coze'");
-  }
-  
-  nn->udelej_prumery(n, coze_enum, kolik);
-}
-
+// //[[Rcpp::export]]
+// void nn_set_vstup_rada(Rcpp::XPtr<NN> nn, Rcpp::NumericVector input_cr){
+//     std::vector<double> input_cr_c = Rcpp::as<std::vector<double>>(input_cr);
+//     nn->set_vstup_rada(input_cr_c);
+// }
 
 //[[Rcpp::export]]
 void nn_shuffle_train(Rcpp::XPtr<NN> nn){

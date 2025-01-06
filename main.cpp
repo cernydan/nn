@@ -46,11 +46,16 @@ int main() {
 
     auto start = high_resolution_clock::now();
 
-    Neuron pepa;
-    pepa.set_vstupy({1.0,2.0,3.0,1.0,2.0,3.0,1.0,2.0,3.0,1.0,2.0,3.0,1.0,2.0,3.0});
-    pepa.set_randomvahy();
-    pepa.vypocet();
-    pepa.print_neuron();
+    NN pepa;
+    Tenzor<double> jn(5,2,2);
+    Tenzor<double> rd(5,2,2);
+    jn.rand_vypln(0,1);
+    rd.rand_vypln(0,1);
+    Tenzor<double> ujn = pepa.konvo_fullstep_3d_1by1(jn,rd);
+    jn.printTenzor();
+    rd.printTenzor();
+    ujn.printTenzor();
+
 
 ///////////////LSTM ///////////////////////////////////////////
     // NN abcde;
