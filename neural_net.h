@@ -66,6 +66,7 @@ public:
     void cnn_full_cal(int iter);
     void cnn_full_val();
     void cnn1D_cal(size_t vel_ker, size_t poc_ker, int iter);
+    void cnn1D_val();
     void cnnonfly_cal(size_t vel_ker, size_t poc_ker, int iter);
     void cnnonfly_val();
     Tenzor<double> kernely_onfly;

@@ -1262,3 +1262,79 @@ void NN::cnn1D_cal(size_t vel_ker, size_t poc_ker, int iter){
             vystupy.push_back(pom_vystup[0]);    
             }           
         }
+
+void NN::cnn1D_val(){
+    std::vector<double> vystzkonv;   
+    Matice<double> biaskonv(3,kernely_1D.getRows());
+    
+    if (Q_val_vstup.size() != R_val_vstup.size()|| Q_val_vstup.size() != T_val_vstup.size()) {
+        std::cout << "vstupni řady nejsou stejně dlouhý";
+        exit(0);
+    }
+
+    vystupy.clear();
+    for(int kroky = 0; kroky < (Q_val_vstup.size() - kernely_1D.getCols()); kroky++){
+
+//// KONVOLUCE //////////////////////////////////////////////////////////////////////////////////////////////////////////////                
+                vystzkonv.clear();
+
+                for(int i = 0; i < kernely_1D.getRows(); i++){
+                    double konvo = 0.0;
+                    for(int j = 0; j < kernely_1D.getCols(); j++){
+                        konvo += Q_val_vstup[kroky+j] * kernely_1D.getElement(0,i,j);
+                    }
+                    konvo += biaskonv.getElement(0,i);
+                    if(konvo < 0.0){
+                        vystzkonv.push_back(konvo*0.01);
+                    }else{
+                        vystzkonv.push_back(konvo);
+                    }
+                }
+
+                for(int i = 0; i < kernely_1D.getRows(); i++){
+                    double konvo = 0.0;
+                    for(int j = 0; j < kernely_1D.getCols(); j++){
+                        konvo += R_val_vstup[kroky+j] * kernely_1D.getElement(1,i,j);
+                    }
+                    konvo += biaskonv.getElement(1,i);
+                    if(konvo < 0.0){
+                        vystzkonv.push_back(konvo*0.01);
+                    }else{
+                        vystzkonv.push_back(konvo);
+                    }
+                }
+
+                for(int i = 0; i < kernely_1D.getRows(); i++){
+                    double konvo = 0.0;
+                    for(int j = 0; j < kernely_1D.getCols(); j++){
+                        konvo += T_val_vstup[kroky+j] * kernely_1D.getElement(2,i,j);
+                    }
+                    konvo += biaskonv.getElement(2,i);
+                    if(konvo < 0.0){
+                        vystzkonv.push_back(konvo*0.01);
+                    }else{
+                        vystzkonv.push_back(konvo);
+                    }
+                }
+
+//// MLP //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                pom_vystup.clear();
+                for (int i = 0; i < rozmery[0]; ++i) {
+                    sit[0][i].set_vstupy(vystzkonv);
+                    sit[0][i].vypocet();
+                    pom_vystup.push_back(sit[0][i].o);
+                }
+                
+                for (int i = 1; i < pocet_vrstev; ++i) {
+                    for (int j = 0; j < rozmery[i]; ++j) {
+                        sit[i][j].set_vstupy(pom_vystup);
+                        sit[i][j].vypocet();
+                    }
+                    pom_vystup.clear();
+                    for (int j = 0; j < rozmery[i]; ++j) {
+                        pom_vystup.push_back( sit[i][j].o);
+                    }
+                }
+            vystupy.push_back(pom_vystup[0]);    
+            }   
+}
