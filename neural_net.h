@@ -63,7 +63,8 @@ public:
     Matice<double> udelej_lag(size_t lag,const std::vector<double>& cr);
     double tanh(double x);
 
-    void cnn_full(int iter);
+    void cnn_full_cal(int iter);
+    void cnn_full_val();
     void cnn1D_cal(size_t vel_ker, size_t poc_ker, int iter);
     void cnnonfly_cal(size_t vel_ker, size_t poc_ker, int iter);
     void cnnonfly_val();

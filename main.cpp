@@ -46,15 +46,6 @@ int main() {
 
     auto start = high_resolution_clock::now();
 
-    NN pepa;
-    Tenzor<double> jn(5,2,2);
-    Tenzor<double> rd(5,2,2);
-    jn.rand_vypln(0,1);
-    rd.rand_vypln(0,1);
-    Tenzor<double> ujn = pepa.konvo_fullstep_3d_1by1(jn,rd);
-    jn.printTenzor();
-    rd.printTenzor();
-    ujn.printTenzor();
 
 
 ///////////////LSTM ///////////////////////////////////////////
