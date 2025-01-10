@@ -88,21 +88,9 @@ void nn_online_bp(Rcpp::XPtr<NN> nn,int iters){
 }
 
 
-
-
 //[[Rcpp::export]]
 void nn_online_bp_adam(Rcpp::XPtr<NN> nn,int iters){
     nn->online_bp_adam(iters);
-}
-
-//[[Rcpp::export]]
-void nn_cnn_pokus_cal(Rcpp::XPtr<NN> nn,size_t vel_ker, size_t poc_ker,int iters){
-    nn->cnnonfly_cal(vel_ker, poc_ker, iters);
-}
-
-//[[Rcpp::export]]
-void nn_cnn_pokus_val(Rcpp::XPtr<NN> nn){
-    nn->cnnonfly_val();
 }
 
 //[[Rcpp::export]]
@@ -148,13 +136,50 @@ double nn_count_cost(Rcpp::XPtr<NN> nn){
     return nn->cost;
 }
 
-// //[[Rcpp::export]]
-// void nn_set_vstup_rada(Rcpp::XPtr<NN> nn, Rcpp::NumericVector input_cr){
-//     std::vector<double> input_cr_c = Rcpp::as<std::vector<double>>(input_cr);
-//     nn->set_vstup_rada(input_cr_c);
-// }
+//[[Rcpp::export]]
+void nn_set_vstup_rady(Rcpp::XPtr<NN> nn, Rcpp::NumericVector Qkal_r, Rcpp::NumericVector Qval_r,
+                                        Rcpp::NumericVector Rkal_r, Rcpp::NumericVector Rval_r,
+                                        Rcpp::NumericVector Tkal_r, Rcpp::NumericVector Tval_r){
+    std::vector<double> Qkal_c = Rcpp::as<std::vector<double>>(Qkal_r);
+    std::vector<double> Qval_c = Rcpp::as<std::vector<double>>(Qval_r);
+    std::vector<double> Rkal_c = Rcpp::as<std::vector<double>>(Rkal_r);
+    std::vector<double> Rval_c = Rcpp::as<std::vector<double>>(Rval_r);
+    std::vector<double> Tkal_c = Rcpp::as<std::vector<double>>(Tkal_r);
+    std::vector<double> Tval_c = Rcpp::as<std::vector<double>>(Tval_r);
+    nn->set_vstup_rady(Qkal_c,Qval_c,Rkal_c,Rval_c,Tkal_c,Tval_c);
+}
 
 //[[Rcpp::export]]
 void nn_shuffle_train(Rcpp::XPtr<NN> nn){
     nn->shuffle_train();
+}
+
+//[[Rcpp::export]]
+void nn_cnn_onfly_cal(Rcpp::XPtr<NN> nn,size_t vel_ker, size_t poc_ker,int iters){
+    nn->cnnonfly_cal(vel_ker, poc_ker, iters);
+}
+
+//[[Rcpp::export]]
+void nn_cnn_onfly_val(Rcpp::XPtr<NN> nn){
+    nn->cnnonfly_val();
+}
+
+//[[Rcpp::export]]
+void nn_cnn_1d_cal(Rcpp::XPtr<NN> nn,size_t vel_ker, size_t poc_ker,int iters){
+    nn->cnn1D_cal(vel_ker, poc_ker, iters);
+}
+
+//[[Rcpp::export]]
+void nn_cnn_1d_val(Rcpp::XPtr<NN> nn){
+    nn->cnn1D_val();
+}
+
+//[[Rcpp::export]]
+void nn_cnn_full_cal(Rcpp::XPtr<NN> nn,int iters){
+    nn->cnn_full_cal(iters);
+}
+
+//[[Rcpp::export]]
+void nn_cnn_full_val(Rcpp::XPtr<NN> nn){
+    nn->cnn_full_val();
 }

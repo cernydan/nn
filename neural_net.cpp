@@ -388,9 +388,16 @@ void NN::print_vystup(){
     }
 }
 
-// void NN::set_vstup_rada(const std::vector<double>& inputs) {
-//     vstupni_cr = inputs;
-// }
+void NN::set_vstup_rady(const std::vector<double>& Qkal_in, const std::vector<double>& Qval_in,
+                        const std::vector<double>& Rkal_in, const std::vector<double>& Rval_in,
+                        const std::vector<double>& Tkal_in, const std::vector<double>& Tval_in) {
+    Q_kal_vstup = Qkal_in;
+    Q_val_vstup = Qval_in;
+    R_kal_vstup = Rkal_in;
+    R_val_vstup = Rval_in;
+    T_kal_vstup = Tkal_in;
+    T_val_vstup = Tval_in;
+}
 
 Matice<double> NN::udelej_lag(size_t lag,const std::vector<double>& cr){
     size_t nrows  = cr.size() - lag+1;

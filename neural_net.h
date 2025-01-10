@@ -58,7 +58,9 @@ public:
     void print_data();
     void shuffle_train();
 
-    void set_vstup_rada(const std::vector<double>& inputs);
+    void set_vstup_rady(const std::vector<double>& Qkal_in, const std::vector<double>& Qval_in,
+                        const std::vector<double>& Rkal_in, const std::vector<double>& Rval_in,
+                        const std::vector<double>& Tkal_in, const std::vector<double>& Tval_in);
     Matice<double> udelej_radky(size_t velrad, const std::vector<double>& cr);
     Matice<double> udelej_lag(size_t lag,const std::vector<double>& cr);
     double tanh(double x);
