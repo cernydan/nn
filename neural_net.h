@@ -67,12 +67,14 @@ public:
 
     void cnn_full_cal(int iter);
     void cnn_full_val();
-    void cnn1D_cal(size_t vel_ker, size_t poc_ker, int iter);
-    void cnn1D_val();
+    void cnn1D_cal(size_t vel_ker, size_t poc_ker, int iter, int velic);
+    void cnn1D_val(int velic);
     void cnnonfly_cal(size_t vel_ker, size_t poc_ker, int iter);
     void cnnonfly_val();
     Tenzor<double> kernely_onfly;
     Tenzor<double> kernely_1D;
+    Matice<double> biaskonv_1D;
+    std::vector<double> biaskonv_onfly;
 
     Tenzor<double> kernely_full_1;
     Tenzor<double> kernely_full_2s;

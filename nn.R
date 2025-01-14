@@ -222,7 +222,37 @@ for(i in 1:3){
     }
   }
 }
-vystupy
+
+
+x = 1
+for(i in 1:5){
+  mlp <- udelej_nn()
+  nn_init_nn(mlp,poc_ker,c(poc_ker,poc_ker,1))
+  nn_set_vstup_rady(mlp, povodi[[i]]$Q[1:(roky_cal*365)],
+                    povodi[[i]]$Q[(roky_cal*365+1):length(povodi[[i]]$Q)], 
+                    povodi[[i]]$R[1:(roky_cal*365)],
+                    povodi[[i]]$R[(roky_cal*365+1):length(povodi[[i]]$R)], 
+                    povodi[[i]]$Tmax[1:(roky_cal*365)],
+                    povodi[[i]]$Tmax[(roky_cal*365+1):length(povodi[[i]]$Tmax)]
+                    )
+  nn_set_chtenejout(povodi[[i]]$Q[((ker-1)*365+ker+1):(365*roky_cal+ker)])
+  nn_cnn_onfly_cal()
+  nn_cnn_onfly_val()
+  vystupy <- nn_get_vystupy(mlp)
+  
+  file_path <- file.path(output_folder, paste0(i, ".png"))
+  png(file_path, width = 800, height = 600) # Nastavení výstupního souboru
+  plot.new()
+  plot(
+    povodi[[i]]$Q[(roky_cal*365+1+ker):length(povodi[[i]]$Q)],
+    type = "l",
+    col = "black",
+    
+  )
+  lines(vystupy,col = "red")
+  dev.off() # Ukončení záznamu do souboru
+  
+}
 
 
 # Nastavení složky, kam se obrázky uloží
@@ -249,7 +279,136 @@ for (i in seq_along(vystupy)) {
   dev.off() # Ukončení záznamu do souboru
 }
 
+#########################################################################################x
+#########################################################################################
+#########################################################################################
 
+{library(Rcpp)
+setwd("C:/Users/danek/Desktop/mlpR/vsnn")
 
+Rcpp::sourceCpp("rcppstuff.cpp")
+povodi <- list()
+for(i in 1:5){
+  
+  Qcamel <- read.table(paste0("./vyberdata/",i,"_q.txt"), header=FALSE)
+  Qcamel <- Qcamel[!(Qcamel$V3 == 2 & Qcamel$V4 == 29), ]  
+  Rcamel <- read.table(paste0("./vyberdata/",i,"_r.txt"), header=FALSE, skip = 4)
+  Rcamel <- Rcamel[!(Rcamel$V2 == 2 & Rcamel$V3 == 29), ]  
+  cur_pov <- data.frame(Q = (Qcamel$V5 * 0.0283168466), R = Rcamel$V6, Tmax = Rcamel$V9)
+  cur_pov$Q <- (cur_pov$Q - min(cur_pov$Q))/(max(cur_pov$Q)-min(cur_pov$Q))
+  cur_pov$R <- (cur_pov$R - min(cur_pov$R))/(max(cur_pov$R)-min(cur_pov$R))
+  cur_pov$Tmax <- (cur_pov$Tmax - min(cur_pov$Tmax))/(max(cur_pov$Tmax)-min(cur_pov$Tmax))
+  povodi[[i]] <- cur_pov
+  rm(cur_pov,Qcamel,Rcamel)
+}
+
+names(povodi) <- c("salmon","bigsur","merced","naci","sft")
+
+mae <- function(mod, obs) {
+  if (length(mod) != length(obs)) {
+    stop("Vektory musí mít stejnou délku")
+  }
+  err = 0
+  for (i in 1:length(mod)){
+    err = err + abs(mod[i] - obs[i])
+  }
+  err = err/length(mod)
+  return(err)
+}
+
+rmse <- function(mod, obs) {
+  if (length(mod) != length(obs)) {
+    stop("Vektory musí mít stejnou délku")
+  }
+  err = 0
+  for (i in 1:length(mod)){
+    err = err + (mod[i] - obs[i])^2
+  }
+  err = sqrt(err/length(mod))
+  return(err)
+}
+
+nse <- function(mod, obs) {
+  if (length(mod) != length(obs)) {
+    stop("Vektory musí mít stejnou délku")
+  }
+  err = 0
+  cit = 0
+  jme = 0
+  for (i in 1:length(mod)){
+    cit = cit + (mod[i] - obs[i])^2
+    jme = jme + (mod[i] - mean(obs))^2
+  }
+  err = 1-(cit/length(mod))/(jme/length(mod))
+  return(err)
+}
+
+}  # nacteni Rcpp, dat a funkce kriterii
+
+output_folder <- "D:/pokusydip/"
+x = 1
+vysl = data.frame()
+for(n in 1:3){
+for(m in 1:3){
+for(l in 1:2){
+for(k in 1:3){
+for(j in 1:3){
+for(i in 1:5){
+  ker = 2+n
+  poc_ker = 10+(m-1)*20
+  roky_cal = 10*l
+  iter = 10+(k-1)*40
+  
+  mlp <- udelej_nn()
+  nn_init_nn(mlp,poc_ker,c(poc_ker,poc_ker,1))
+  nn_set_vstup_rady(mlp, povodi[[i]]$Q[1:(roky_cal*365)],
+                    povodi[[i]]$Q[(roky_cal*365+1):length(povodi[[i]]$Q)], 
+                    povodi[[i]]$R[1:(roky_cal*365)],
+                    povodi[[i]]$R[(roky_cal*365+1):length(povodi[[i]]$R)], 
+                    povodi[[i]]$Tmax[1:(roky_cal*365)],
+                    povodi[[i]]$Tmax[(roky_cal*365+1):length(povodi[[i]]$Tmax)]
+  )
+  nn_set_chtenejout(mlp,povodi[[i]]$Q[((ker-1)*365+ker+1):(365*roky_cal+ker)])
+  nn_cnn_onfly_cal(mlp,ker,poc_ker,iter)
+  nn_cnn_onfly_val(mlp)
+  vystupy <- nn_get_vystupy(mlp)
+  
+  file_path <- file.path(output_folder, paste0(x, ".png"))
+  png(file_path, width = 800, height = 600) # Nastavení výstupního souboru
+  plot.new()
+  plot(
+    c(povodi[[i]]$Q[((roky_cal+ker-1)*365+1+ker):length(povodi[[i]]$Q)],
+      povodi[[i]]$Q[((roky_cal+ker-1)*365+1):((roky_cal+ker-1)*365+ker)]),
+    type = "l",
+    col = "black",
+    main = paste0("pokus=", j," povodi=",i," ker=", ker, " poc=", poc_ker, " roky cal=", roky_cal, " iter=", iter),
+    sub = paste0(" mae=", mae(vystupy,c(povodi[[i]]$Q[((roky_cal+ker-1)*365+1+ker):length(povodi[[i]]$Q)],
+                                        povodi[[i]]$Q[((roky_cal+ker-1)*365+1):((roky_cal+ker-1)*365+ker)])),
+                 " rmse=", rmse(vystupy,c(povodi[[i]]$Q[((roky_cal+ker-1)*365+1+ker):length(povodi[[i]]$Q)],
+                                          povodi[[i]]$Q[((roky_cal+ker-1)*365+1):((roky_cal+ker-1)*365+ker)])),
+                 " nse=", nse(vystupy,c(povodi[[i]]$Q[((roky_cal+ker-1)*365+1+ker):length(povodi[[i]]$Q)],
+                                        povodi[[i]]$Q[((roky_cal+ker-1)*365+1):((roky_cal+ker-1)*365+ker)])))
+    
+  )
+  lines(vystupy,col = "red")
+  dev.off() # Ukončení záznamu do souboru
+  print(x)
+  vysl[x,1] = j
+  vysl[x,2] = i
+  vysl[x,3] = ker
+  vysl[x,4] = poc_ker
+  vysl[x,5] = roky_cal
+  vysl[x,6] = iter
+  vysl[x,7] = mae(vystupy,c(povodi[[i]]$Q[((roky_cal+ker-1)*365+1+ker):length(povodi[[i]]$Q)],
+                            povodi[[i]]$Q[((roky_cal+ker-1)*365+1):((roky_cal+ker-1)*365+ker)]))
+  vysl[x,8] = rmse(vystupy,c(povodi[[i]]$Q[((roky_cal+ker-1)*365+1+ker):length(povodi[[i]]$Q)],
+                             povodi[[i]]$Q[((roky_cal+ker-1)*365+1):((roky_cal+ker-1)*365+ker)]))
+  vysl[x,9] = nse(vystupy,c(povodi[[i]]$Q[((roky_cal+ker-1)*365+1+ker):length(povodi[[i]]$Q)],
+                            povodi[[i]]$Q[((roky_cal+ker-1)*365+1):((roky_cal+ker-1)*365+ker)]))
+  x= x+1
+}}}}}}
+names(vysl) = c("pokus","povodi","ker","poc","roky_cal","iter","mae","rmse","nse")
+vysl[vysl$nse == max(vysl$nse),]
+vysl[vysl$povodi ==3,]
 
 

@@ -4,7 +4,9 @@ povodi <- list()
 for(i in 1:5){
   
   Qcamel <- read.table(paste0("./vyberdata/",i,"_q.txt"), header=FALSE)
+  Qcamel <- Qcamel[!(Qcamel$V3 == 2 & Qcamel$V4 == 29), ]  
   Rcamel <- read.table(paste0("./vyberdata/",i,"_r.txt"), header=FALSE, skip = 4)
+  Rcamel <- Rcamel[!(Rcamel$V2 == 2 & Rcamel$V3 == 29), ]  
   cur_pov <- data.frame(Q = (Qcamel$V5 * 0.0283168466), R = Rcamel$V6, Tmax = Rcamel$V9)
   cur_pov$Q <- (cur_pov$Q - min(cur_pov$Q))/(max(cur_pov$Q)-min(cur_pov$Q))
   cur_pov$R <- (cur_pov$R - min(cur_pov$R))/(max(cur_pov$R)-min(cur_pov$R))
@@ -29,10 +31,6 @@ mae <- function(mod, obs) {
   err = err/length(mod)
   return(err)
 }
-
-abc = c(1,4,8,5)
-def = c(3,1,8,9)
-
 
 rmse <- function(mod, obs) {
   if (length(mod) != length(obs)) {
