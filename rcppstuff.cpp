@@ -155,8 +155,8 @@ void nn_shuffle_train(Rcpp::XPtr<NN> nn){
 }
 
 //[[Rcpp::export]]
-void nn_cnn_onfly_cal(Rcpp::XPtr<NN> nn,size_t vel_ker, size_t poc_ker,int iters){
-    nn->cnnonfly_cal(vel_ker, poc_ker, iters);
+void nn_cnn_onfly_cal(Rcpp::XPtr<NN> nn,size_t row_ker,size_t col_ker, size_t poc_ker,int iters){
+    nn->cnnonfly_cal(row_ker,col_ker, poc_ker, iters);
 }
 
 //[[Rcpp::export]]
