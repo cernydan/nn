@@ -866,12 +866,11 @@ for(int ite = 0;ite<iter;++ite){
 
 ///////////// MLP BACKPROP
         count_cost();
-        sit[pocet_vrstev-1][rozmery[pocet_vrstev-1]-1].delta = cost;
-        for (int i=0;i<rozmery[pocet_vrstev-2];++i){
-            sit[pocet_vrstev-2][i].delta = sit[pocet_vrstev-2][i].der_akt_fun(sit[pocet_vrstev-2][i].a)*(sit[pocet_vrstev-1][rozmery[pocet_vrstev-1]-1].vahy[i] * sit[pocet_vrstev-1][rozmery[pocet_vrstev-1]-1].delta);
-         }
+        for(int i = 0;i<rozmery[pocet_vrstev-1];i++){
+            sit[pocet_vrstev-1][i].delta = cost;
+        }
 
-        for(int j = (pocet_vrstev-3); j>=0;--j){
+        for(int j = (pocet_vrstev-2); j>=0;--j){
             for (int i=0;i<rozmery[j];++i){
                  double skalsoucprv = 0.0;
                 for(int k = 0;k<rozmery[j+1];++k){

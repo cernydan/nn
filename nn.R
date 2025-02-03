@@ -97,86 +97,257 @@ lines(c(simulout,simulout2),col = "red")
 plot(Qval[1:300],type = "l")
 lines(simulout2[1:300],col = "red")
 
+# #########################################################################################x
+# #########################       CNN ON FLY          #####################################
+# #########################################################################################
+# 
+# {library(Rcpp)
+# setwd("C:/Users/danek/Desktop/mlpR/vsnn")
+# 
+# Rcpp::sourceCpp("rcppstuff.cpp")
+# povodi <- list()
+# for(i in 1:5){
+#   
+#   Qcamel <- read.table(paste0("./vyberdata/",i,"_q.txt"), header=FALSE)
+#   Qcamel <- Qcamel[!(Qcamel$V3 == 2 & Qcamel$V4 == 29), ]  
+#   Rcamel <- read.table(paste0("./vyberdata/",i,"_r.txt"), header=FALSE, skip = 4)
+#   Rcamel <- Rcamel[!(Rcamel$V2 == 2 & Rcamel$V3 == 29), ]  
+#   cur_pov <- data.frame(Q = (Qcamel$V5 * 0.0283168466), R = Rcamel$V6, Tmax = Rcamel$V9)
+#   cur_pov$Q <- (cur_pov$Q - min(cur_pov$Q))/(max(cur_pov$Q)-min(cur_pov$Q))
+#   cur_pov$R <- (cur_pov$R - min(cur_pov$R))/(max(cur_pov$R)-min(cur_pov$R))
+#   cur_pov$Tmax <- (cur_pov$Tmax - min(cur_pov$Tmax))/(max(cur_pov$Tmax)-min(cur_pov$Tmax))
+#   povodi[[i]] <- cur_pov
+#   rm(cur_pov,Qcamel,Rcamel)
+# }
+# 
+# names(povodi) <- c("salmon","bigsur","merced","arroyo","andreas")
+# 
+# mae <- function(mod, obs) {
+#   if (length(mod) != length(obs)) {
+#     stop("Vektory musí mít stejnou délku")
+#   }
+#   err = 0
+#   for (i in 1:length(mod)){
+#     err = err + abs(mod[i] - obs[i])
+#   }
+#   err = err/length(mod)
+#   return(err)
+# }
+# 
+# rmse <- function(mod, obs) {
+#   if (length(mod) != length(obs)) {
+#     stop("Vektory musí mít stejnou délku")
+#   }
+#   err = 0
+#   for (i in 1:length(mod)){
+#     err = err + (mod[i] - obs[i])^2
+#   }
+#   err = sqrt(err/length(mod))
+#   return(err)
+# }
+# 
+# nse <- function(mod, obs) {
+#   if (length(mod) != length(obs)) {
+#     stop("Vektory musí mít stejnou délku")
+#   }
+#   err = 0
+#   cit = 0
+#   jme = 0
+#   for (i in 1:length(mod)){
+#     cit = cit + (mod[i] - obs[i])^2
+#     jme = jme + (mod[i] - mean(obs))^2
+#   }
+#   err = 1-(cit/length(mod))/(jme/length(mod))
+#   return(err)
+# }
+#   
+#   pi <- function(mod, obs) {
+#     if (length(mod) != length(obs)) {
+#       stop("Vektory musí mít stejnou délku")
+#     }
+#     err = 0
+#     cit = 0
+#     jme = 0
+#     for (i in 2:length(mod)){
+#       cit = cit + (mod[i] - obs[i])^2
+#       jme = jme + (mod[i] - obs[i-1])^2
+#     }
+#     err = 1-(cit/length(mod))/(jme/length(mod))
+#     return(err)
+# }
+# 
+# }  # nacteni Rcpp, dat a funkce kriterii
+# 
+# output_folder <- "D:/pokusydip/"
+# x = 1
+# vysl = data.frame()
+# for(n in 1){
+# for(m in 1){
+# for(l in 1){
+# for(k in 1){
+# for(j in 1){
+# for(i in 5){
+#   row_ker = 3
+#   col_ker = 4
+#   poc_ker = 100
+#   roky_cal = 20
+#   iter = 500
+#   
+#   mlp <- udelej_nn()
+#   nn_init_nn(mlp,poc_ker,c(poc_ker,poc_ker,1))
+#   nn_set_vstup_rady(mlp, povodi[[i]]$Q[1:(roky_cal*365)],
+#                     povodi[[i]]$Q[(roky_cal*365+1):length(povodi[[i]]$Q)], 
+#                     povodi[[i]]$R[1:(roky_cal*365)],
+#                     povodi[[i]]$R[(roky_cal*365+1):length(povodi[[i]]$R)], 
+#                     povodi[[i]]$Tmax[1:(roky_cal*365)],
+#                     povodi[[i]]$Tmax[(roky_cal*365+1):length(povodi[[i]]$Tmax)]
+#   )
+#   nn_set_chtenejout(mlp,povodi[[i]]$Q[((row_ker-1)*365+col_ker+1):(365*roky_cal+col_ker)])
+#   nn_cnn_onfly_cal(mlp,row_ker,col_ker,poc_ker,iter)
+#   nn_cnn_onfly_val(mlp)
+#   vystupy <- nn_get_vystupy(mlp)
+#   
+#   file_path <- file.path(output_folder, paste0(x, ".png"))
+#   png(file_path, width = 800, height = 600) # Nastavení výstupního souboru
+#   plot.new()
+#   plot(
+#     c(povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1+col_ker):length(povodi[[i]]$Q)],
+#       povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1):((roky_cal+row_ker-1)*365+col_ker)]),
+#     type = "l",
+#     col = "black",
+#     main = paste0("pokus=", j," povodi=",i," row_ker=", row_ker," col_ker=", col_ker, " poc=", poc_ker, " roky cal=", roky_cal, " iter=", iter),
+#     sub = paste0(" mae=", mae(vystupy,c(povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1+col_ker):length(povodi[[i]]$Q)],
+#                                         povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1):((roky_cal+row_ker-1)*365+col_ker)])),
+#                  " rmse=", rmse(vystupy,c(povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1+col_ker):length(povodi[[i]]$Q)],
+#                                           povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1):((roky_cal+row_ker-1)*365+col_ker)])),
+#                  " nse=", nse(vystupy,c(povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1+col_ker):length(povodi[[i]]$Q)],
+#                                         povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1):((roky_cal+row_ker-1)*365+col_ker)])))
+#     
+#   )
+#   lines(vystupy,col = "red")
+#   dev.off() # Ukončení záznamu do souboru
+#   print(x)
+#   vysl[x,1] = j
+#   vysl[x,2] = i
+#   vysl[x,3] = row_ker
+#   vysl[x,4] = col_ker
+#   vysl[x,5] = poc_ker
+#   vysl[x,6] = roky_cal
+#   vysl[x,7] = iter
+#   vysl[x,8] = mae(vystupy,c(povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1+col_ker):length(povodi[[i]]$Q)],
+#                             povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1):((roky_cal+row_ker-1)*365+col_ker)]))
+#   vysl[x,9] = rmse(vystupy,c(povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1+col_ker):length(povodi[[i]]$Q)],
+#                              povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1):((roky_cal+row_ker-1)*365+col_ker)]))
+#   vysl[x,10] = nse(vystupy,c(povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1+col_ker):length(povodi[[i]]$Q)],
+#                             povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1):((roky_cal+row_ker-1)*365+col_ker)]))
+#   x= x+1
+# }}}}}}
+# names(vysl) = c("pokus","povodi","row_ker","col_ker","poc","roky_cal","iter","mae","rmse","nse")
+# vysl[vysl$nse == max(vysl$nse),]
+# vysl[vysl$rmse == min(vysl$rmse),]
+# vysl[vysl$mae == min(vysl$mae),]
+# vysl[vysl$nse>0.5&vysl$povodi==2,]
+
 #########################################################################################x
 #########################       CNN ON FLY          #####################################
 #########################################################################################
 
 {library(Rcpp)
-setwd("C:/Users/danek/Desktop/mlpR/vsnn")
-
-Rcpp::sourceCpp("rcppstuff.cpp")
-povodi <- list()
-for(i in 1:5){
+  setwd("C:/Users/danek/Desktop/mlpR/vsnn")
+  library(ggplot2)
+  Rcpp::sourceCpp("rcppstuff.cpp")
+  povodi <- list()
+  minmax <- data.frame()
+  for(i in 1:5){
+    Qcamel <- read.table(paste0("./vyberdata/",i,"_q.txt"), header=FALSE)
+    Qcamel <- Qcamel[!(Qcamel$V3 == 2 & Qcamel$V4 == 29), ]  
+    Rcamel <- read.table(paste0("./vyberdata/",i,"_r.txt"), header=FALSE, skip = 4)
+    Rcamel <- Rcamel[!(Rcamel$V2 == 2 & Rcamel$V3 == 29), ]  
+    cur_pov <- data.frame(Datum = as.Date(paste(Rcamel$V1,Rcamel$V2,Rcamel$V3, sep = "-")),
+                          Q = (Qcamel$V5 * 0.0283168466), R = Rcamel$V6, Tmax = Rcamel$V9)
+    minmax[i,1] = min(cur_pov$Q)
+    minmax[i,2] = max(cur_pov$Q)
+    cur_pov$Q <- (cur_pov$Q - min(cur_pov$Q))/(max(cur_pov$Q)-min(cur_pov$Q))
+    cur_pov$R <- (cur_pov$R - min(cur_pov$R))/(max(cur_pov$R)-min(cur_pov$R))
+    cur_pov$Tmax <- (cur_pov$Tmax - min(cur_pov$Tmax))/(max(cur_pov$Tmax)-min(cur_pov$Tmax))
+    povodi[[i]] <- cur_pov
+    rm(cur_pov,Qcamel,Rcamel)
+  }
+  names(minmax) <- c("minQ","maxQ")
+  names_povodi <- c("salmon","bigsur","merced","arroyo","andreas")
+  names(povodi) <- names_povodi
   
-  Qcamel <- read.table(paste0("./vyberdata/",i,"_q.txt"), header=FALSE)
-  Qcamel <- Qcamel[!(Qcamel$V3 == 2 & Qcamel$V4 == 29), ]  
-  Rcamel <- read.table(paste0("./vyberdata/",i,"_r.txt"), header=FALSE, skip = 4)
-  Rcamel <- Rcamel[!(Rcamel$V2 == 2 & Rcamel$V3 == 29), ]  
-  cur_pov <- data.frame(Q = (Qcamel$V5 * 0.0283168466), R = Rcamel$V6, Tmax = Rcamel$V9)
-  cur_pov$Q <- (cur_pov$Q - min(cur_pov$Q))/(max(cur_pov$Q)-min(cur_pov$Q))
-  cur_pov$R <- (cur_pov$R - min(cur_pov$R))/(max(cur_pov$R)-min(cur_pov$R))
-  cur_pov$Tmax <- (cur_pov$Tmax - min(cur_pov$Tmax))/(max(cur_pov$Tmax)-min(cur_pov$Tmax))
-  povodi[[i]] <- cur_pov
-  rm(cur_pov,Qcamel,Rcamel)
-}
-
-names(povodi) <- c("salmon","bigsur","merced","arroyo","andreas")
-
-mae <- function(mod, obs) {
-  if (length(mod) != length(obs)) {
-    stop("Vektory musí mít stejnou délku")
+  mae <- function(mod, obs) {
+    if (length(mod) != length(obs)) {
+      stop("Vektory musí mít stejnou délku")
+    }
+    err = 0
+    for (i in 1:length(mod)){
+      err = err + abs(mod[i] - obs[i])
+    }
+    err = err/length(mod)
+    return(err)
   }
-  err = 0
-  for (i in 1:length(mod)){
-    err = err + abs(mod[i] - obs[i])
+  
+  rmse <- function(mod, obs) {
+    if (length(mod) != length(obs)) {
+      stop("Vektory musí mít stejnou délku")
+    }
+    err = 0
+    for (i in 1:length(mod)){
+      err = err + (mod[i] - obs[i])^2
+    }
+    err = sqrt(err/length(mod))
+    return(err)
   }
-  err = err/length(mod)
-  return(err)
-}
-
-rmse <- function(mod, obs) {
-  if (length(mod) != length(obs)) {
-    stop("Vektory musí mít stejnou délku")
+  
+  nse <- function(mod, obs) {
+    if (length(mod) != length(obs)) {
+      stop("Vektory musí mít stejnou délku")
+    }
+    err = 0
+    cit = 0
+    jme = 0
+    for (i in 1:length(mod)){
+      cit = cit + (obs[i] - mod[i])^2
+      jme = jme + (obs[i] - mean(obs))^2
+    }
+    err = 1-(cit/length(mod))/(jme/length(mod))
+    return(err)
   }
-  err = 0
-  for (i in 1:length(mod)){
-    err = err + (mod[i] - obs[i])^2
+  
+  pi <- function(mod, obs) {
+    if (length(mod) != length(obs)) {
+      stop("Vektory musí mít stejnou délku")
+    }
+    err = 0
+    cit = 0
+    jme = 0
+    for (i in 2:length(mod)){
+      cit = cit + (obs[i] - mod[i])^2
+      jme = jme + (obs[i] - obs[i-1])^2
+    }
+    err = 1-(cit/length(mod))/(jme/length(mod))
+    return(err)
   }
-  err = sqrt(err/length(mod))
-  return(err)
-}
-
-nse <- function(mod, obs) {
-  if (length(mod) != length(obs)) {
-    stop("Vektory musí mít stejnou délku")
-  }
-  err = 0
-  cit = 0
-  jme = 0
-  for (i in 1:length(mod)){
-    cit = cit + (mod[i] - obs[i])^2
-    jme = jme + (mod[i] - mean(obs))^2
-  }
-  err = 1-(cit/length(mod))/(jme/length(mod))
-  return(err)
-}
-
+  
 }  # nacteni Rcpp, dat a funkce kriterii
 
 output_folder <- "D:/pokusydip/"
 x = 1
 vysl = data.frame()
+vysl_cr = list()
 for(n in 1){
 for(m in 1){
 for(l in 1){
 for(k in 1){
 for(j in 1){
-for(i in 5){
-  row_ker = 3
-  col_ker = 4
-  poc_ker = 100
-  roky_cal = 20
-  iter = 500
+for(i in 4:5){
+  row_ker = n
+  col_ker = m
+  poc_ker = l
+  roky_cal = k
+  iter = j
   
   mlp <- udelej_nn()
   nn_init_nn(mlp,poc_ker,c(poc_ker,poc_ker,1))
@@ -192,264 +363,162 @@ for(i in 5){
   nn_cnn_onfly_val(mlp)
   vystupy <- nn_get_vystupy(mlp)
   
-  file_path <- file.path(output_folder, paste0(x, ".png"))
-  png(file_path, width = 800, height = 600) # Nastavení výstupního souboru
-  plot.new()
-  plot(
-    c(povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1+col_ker):length(povodi[[i]]$Q)],
-      povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1):((roky_cal+row_ker-1)*365+col_ker)]),
-    type = "l",
-    col = "black",
-    main = paste0("pokus=", j," povodi=",i," row_ker=", row_ker," col_ker=", col_ker, " poc=", poc_ker, " roky cal=", roky_cal, " iter=", iter),
-    sub = paste0(" mae=", mae(vystupy,c(povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1+col_ker):length(povodi[[i]]$Q)],
-                                        povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1):((roky_cal+row_ker-1)*365+col_ker)])),
-                 " rmse=", rmse(vystupy,c(povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1+col_ker):length(povodi[[i]]$Q)],
-                                          povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1):((roky_cal+row_ker-1)*365+col_ker)])),
-                 " nse=", nse(vystupy,c(povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1+col_ker):length(povodi[[i]]$Q)],
-                                        povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1):((roky_cal+row_ker-1)*365+col_ker)])))
-    
+  # Vytvoření datového rámce pro ggplot
+  df_plot <- data.frame(
+    Datum = povodi[[i]]$Datum[((roky_cal+row_ker-1)*365+1):length(povodi[[i]]$Datum)],
+    Q_měřené = c(povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1+col_ker):length(povodi[[i]]$Q)],
+                 povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1):((roky_cal+row_ker-1)*365+col_ker)])*(minmax[i,2]-minmax[i,1])+minmax[i,1],
+    Q_modelované = vystupy*(minmax[i,2]-minmax[i,1])+minmax[i,1]
   )
-  lines(vystupy,col = "red")
-  dev.off() # Ukončení záznamu do souboru
+  
+  # Vytvoření ggplot objektu
+  plot <- ggplot(df_plot, aes(x = Datum)) +
+    geom_line(aes(y = Q_měřené, color = "Měřené"), linewidth = 0.6) +
+    geom_line(aes(y = Q_modelované, color = "Model"), linewidth = 0.45) +
+    scale_color_manual(values = c("Měřené" = "black", "Model" = "red")) +
+    labs(
+      title = paste0("povodi=", i, " radky=", row_ker, " sloupce=", col_ker, 
+                     " poc=", poc_ker, " roky cal=", roky_cal, " iter=", iter),
+      subtitle = paste0(
+        "mae=", round(mae(df_plot$Q_modelované, df_plot$Q_měřené),3), 
+        "    rmse=", round(rmse(df_plot$Q_modelované, df_plot$Q_měřené),3), 
+        "    nse=", round(nse(df_plot$Q_modelované, df_plot$Q_měřené),3), 
+        "    pi=", round(pi(df_plot$Q_modelované, df_plot$Q_měřené),3)
+      ),
+      x = NULL,
+      y = "Q [m3/s]",
+      colour = NULL
+    ) +
+    theme_minimal() +
+    theme(
+      legend.position = "bottom",
+      plot.title = element_text(size = 14, face = "bold"),
+      plot.subtitle = element_text(size = 10)
+    )
+  
+  cur_id = paste0(i,"_",row_ker,"_",col_ker,"_",poc_ker,"_",roky_cal,"_",iter,"_o")
+  # Uložení grafu do souboru
+  file_path <- file.path(output_folder, paste0(cur_id, ".png"))
+  ggsave(file_path, plot = plot, width = 8, height = 6, dpi = 300, bg = "white")
+  
   print(x)
-  vysl[x,1] = j
-  vysl[x,2] = i
-  vysl[x,3] = row_ker
-  vysl[x,4] = col_ker
-  vysl[x,5] = poc_ker
-  vysl[x,6] = roky_cal
-  vysl[x,7] = iter
-  vysl[x,8] = mae(vystupy,c(povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1+col_ker):length(povodi[[i]]$Q)],
-                            povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1):((roky_cal+row_ker-1)*365+col_ker)]))
-  vysl[x,9] = rmse(vystupy,c(povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1+col_ker):length(povodi[[i]]$Q)],
-                             povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1):((roky_cal+row_ker-1)*365+col_ker)]))
-  vysl[x,10] = nse(vystupy,c(povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1+col_ker):length(povodi[[i]]$Q)],
-                            povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1):((roky_cal+row_ker-1)*365+col_ker)]))
+  vysl[x,1] = names_povodi[i]
+  vysl[x,2] = row_ker
+  vysl[x,3] = col_ker
+  vysl[x,4] = poc_ker
+  vysl[x,5] = roky_cal
+  vysl[x,6] = iter
+  vysl[x,7] = round(mae(df_plot$Q_modelované,df_plot$Q_měřené),3)
+  vysl[x,8] = round(rmse(df_plot$Q_modelované,df_plot$Q_měřené),3)
+  vysl[x,9] = round(nse(df_plot$Q_modelované,df_plot$Q_měřené),3)
+  vysl[x,10] = round(pi(df_plot$Q_modelované,df_plot$Q_měřené),3)
+  vysl[x,11] = x
+  vysl[x,12] = cur_id
   x= x+1
 }}}}}}
-names(vysl) = c("pokus","povodi","row_ker","col_ker","poc","roky_cal","iter","mae","rmse","nse")
-vysl[vysl$nse == max(vysl$nse),]
-vysl[vysl$rmse == min(vysl$rmse),]
-vysl[vysl$mae == min(vysl$mae),]
-vysl[vysl$nse>0.5&vysl$povodi==2,]
-
-#########################################################################################x
-#########################       CNN ON FLY          #####################################
-#########################################################################################
-
-{library(Rcpp)
-setwd("C:/Users/danek/Desktop/mlpR/vsnn")
-
-Rcpp::sourceCpp("rcppstuff.cpp")
-povodi <- list()
-for(i in 1:5){
-  
-  Qcamel <- read.table(paste0("./vyberdata/",i,"_q.txt"), header=FALSE)
-  Qcamel <- Qcamel[!(Qcamel$V3 == 2 & Qcamel$V4 == 29), ]  
-  Rcamel <- read.table(paste0("./vyberdata/",i,"_r.txt"), header=FALSE, skip = 4)
-  Rcamel <- Rcamel[!(Rcamel$V2 == 2 & Rcamel$V3 == 29), ]  
-  cur_pov <- data.frame(Q = (Qcamel$V5 * 0.0283168466), R = Rcamel$V6, Tmax = Rcamel$V9)
-  cur_pov$Q <- (cur_pov$Q - min(cur_pov$Q))/(max(cur_pov$Q)-min(cur_pov$Q))
-  cur_pov$R <- (cur_pov$R - min(cur_pov$R))/(max(cur_pov$R)-min(cur_pov$R))
-  cur_pov$Tmax <- (cur_pov$Tmax - min(cur_pov$Tmax))/(max(cur_pov$Tmax)-min(cur_pov$Tmax))
-  povodi[[i]] <- cur_pov
-  rm(cur_pov,Qcamel,Rcamel)
-}
-
-names(povodi) <- c("salmon","bigsur","merced","dry","palm")
-
-mae <- function(mod, obs) {
-  if (length(mod) != length(obs)) {
-    stop("Vektory musí mít stejnou délku")
-  }
-  err = 0
-  for (i in 1:length(mod)){
-    err = err + abs(mod[i] - obs[i])
-  }
-  err = err/length(mod)
-  return(err)
-}
-
-rmse <- function(mod, obs) {
-  if (length(mod) != length(obs)) {
-    stop("Vektory musí mít stejnou délku")
-  }
-  err = 0
-  for (i in 1:length(mod)){
-    err = err + (mod[i] - obs[i])^2
-  }
-  err = sqrt(err/length(mod))
-  return(err)
-}
-
-nse <- function(mod, obs) {
-  if (length(mod) != length(obs)) {
-    stop("Vektory musí mít stejnou délku")
-  }
-  err = 0
-  cit = 0
-  jme = 0
-  for (i in 1:length(mod)){
-    cit = cit + (mod[i] - obs[i])^2
-    jme = jme + (mod[i] - mean(obs))^2
-  }
-  err = 1-(cit/length(mod))/(jme/length(mod))
-  return(err)
-}
-
-}  # nacteni Rcpp, dat a funkce kriterii
-
-output_folder <- "D:/pokusydip/"
-x = 1
-vysl = data.frame()
-for(n in 1){
-for(m in 1){
-for(l in 1){
-for(k in 1){
-for(j in 1){
-for(i in 4){
-  row_ker = 1
-  col_ker = 7
-  poc_ker = 50
-  roky_cal = 15
-  iter = 1000
-  
-  mlp <- udelej_nn()
-  nn_init_nn(mlp,poc_ker,c(poc_ker,poc_ker,1))
-  nn_set_vstup_rady(mlp, povodi[[i]]$Q[1:(roky_cal*365)],
-                    povodi[[i]]$Q[(roky_cal*365+1):length(povodi[[i]]$Q)], 
-                    povodi[[i]]$R[1:(roky_cal*365)],
-                    povodi[[i]]$R[(roky_cal*365+1):length(povodi[[i]]$R)], 
-                    povodi[[i]]$Tmax[1:(roky_cal*365)],
-                    povodi[[i]]$Tmax[(roky_cal*365+1):length(povodi[[i]]$Tmax)]
-  )
-  nn_set_chtenejout(mlp,povodi[[i]]$Q[((row_ker-1)*365+col_ker+1):(365*roky_cal+col_ker)])
-  nn_cnn_onfly_cal(mlp,row_ker,col_ker,poc_ker,iter)
-  nn_cnn_onfly_val(mlp)
-  vystupy <- nn_get_vystupy(mlp)
-  
-  file_path <- file.path(output_folder, paste0(x, ".png"))
-  png(file_path, width = 800, height = 600) # Nastavení výstupního souboru
-  plot.new()
-  plot(
-    c(povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1+col_ker):length(povodi[[i]]$Q)],
-      povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1):((roky_cal+row_ker-1)*365+col_ker)]),
-    type = "l",
-    col = "black",
-    main = paste0("pokus=", j," povodi=",i," row_ker=", row_ker," col_ker=", col_ker, " poc=", poc_ker, " roky cal=", roky_cal, " iter=", iter),
-    sub = paste0(" mae=", mae(vystupy,c(povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1+col_ker):length(povodi[[i]]$Q)],
-                                        povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1):((roky_cal+row_ker-1)*365+col_ker)])),
-                 " rmse=", rmse(vystupy,c(povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1+col_ker):length(povodi[[i]]$Q)],
-                                          povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1):((roky_cal+row_ker-1)*365+col_ker)])),
-                 " nse=", nse(vystupy,c(povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1+col_ker):length(povodi[[i]]$Q)],
-                                        povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1):((roky_cal+row_ker-1)*365+col_ker)])))
-    
-  )
-  lines(vystupy,col = "red")
-  dev.off() # Ukončení záznamu do souboru
-  print(x)
-  vysl[x,1] = j
-  vysl[x,2] = i
-  vysl[x,3] = row_ker
-  vysl[x,4] = col_ker
-  vysl[x,5] = poc_ker
-  vysl[x,6] = roky_cal
-  vysl[x,7] = iter
-  vysl[x,8] = mae(vystupy,c(povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1+col_ker):length(povodi[[i]]$Q)],
-                            povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1):((roky_cal+row_ker-1)*365+col_ker)]))
-  vysl[x,9] = rmse(vystupy,c(povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1+col_ker):length(povodi[[i]]$Q)],
-                             povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1):((roky_cal+row_ker-1)*365+col_ker)]))
-  vysl[x,10] = nse(vystupy,c(povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1+col_ker):length(povodi[[i]]$Q)],
-                            povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1):((roky_cal+row_ker-1)*365+col_ker)]))
-  x= x+1
-}}}}}}
-names(vysl) = c("pokus","povodi","row_ker","col_ker","poc","roky_cal","iter","mae","rmse","nse")
-vysl[vysl$nse == max(vysl$nse),]
-vysl[vysl$rmse == min(vysl$rmse),]
-vysl[vysl$mae == min(vysl$mae),]
-vysl[vysl$nse>0.5&vysl$povodi==2,]
-
+names(vysl) = c("povodi","row_ker","col_ker","poc","roky_cal","iter","mae","rmse","nse","pi","x","id")
+saveRDS(vysl,"D:/pokusydip/vysl.rds")
+saveRDS(vysl_cr,"D:/pokusydip/vysl_cr.rds")
 
 #########################################################################################x
 #########################         1D CNN          #####################################
 #########################################################################################
 
 {library(Rcpp)
-setwd("C:/Users/danek/Desktop/mlpR/vsnn")
-
-Rcpp::sourceCpp("rcppstuff.cpp")
-povodi <- list()
-for(i in 1:5){
+  setwd("C:/Users/danek/Desktop/mlpR/vsnn")
+  library(ggplot2)
+  Rcpp::sourceCpp("rcppstuff.cpp")
+  povodi <- list()
+  minmax <- data.frame()
+  for(i in 1:5){
+    Qcamel <- read.table(paste0("./vyberdata/",i,"_q.txt"), header=FALSE)
+    Qcamel <- Qcamel[!(Qcamel$V3 == 2 & Qcamel$V4 == 29), ]  
+    Rcamel <- read.table(paste0("./vyberdata/",i,"_r.txt"), header=FALSE, skip = 4)
+    Rcamel <- Rcamel[!(Rcamel$V2 == 2 & Rcamel$V3 == 29), ]  
+    cur_pov <- data.frame(Datum = as.Date(paste(Rcamel$V1,Rcamel$V2,Rcamel$V3, sep = "-")),
+                          Q = (Qcamel$V5 * 0.0283168466), R = Rcamel$V6, Tmax = Rcamel$V9)
+    minmax[i,1] = min(cur_pov$Q)
+    minmax[i,2] = max(cur_pov$Q)
+    cur_pov$Q <- (cur_pov$Q - min(cur_pov$Q))/(max(cur_pov$Q)-min(cur_pov$Q))
+    cur_pov$R <- (cur_pov$R - min(cur_pov$R))/(max(cur_pov$R)-min(cur_pov$R))
+    cur_pov$Tmax <- (cur_pov$Tmax - min(cur_pov$Tmax))/(max(cur_pov$Tmax)-min(cur_pov$Tmax))
+    povodi[[i]] <- cur_pov
+    rm(cur_pov,Qcamel,Rcamel)
+  }
+  names(minmax) <- c("minQ","maxQ")
+  names_povodi <- c("salmon","bigsur","merced","arroyo","andreas")
+  names(povodi) <- names_povodi
   
-  Qcamel <- read.table(paste0("./vyberdata/",i,"_q.txt"), header=FALSE)
-  Qcamel <- Qcamel[!(Qcamel$V3 == 2 & Qcamel$V4 == 29), ]  
-  Rcamel <- read.table(paste0("./vyberdata/",i,"_r.txt"), header=FALSE, skip = 4)
-  Rcamel <- Rcamel[!(Rcamel$V2 == 2 & Rcamel$V3 == 29), ]  
-  cur_pov <- data.frame(Q = (Qcamel$V5 * 0.0283168466), R = Rcamel$V6, Tmax = Rcamel$V9)
-  cur_pov$Q <- (cur_pov$Q - min(cur_pov$Q))/(max(cur_pov$Q)-min(cur_pov$Q))
-  cur_pov$R <- (cur_pov$R - min(cur_pov$R))/(max(cur_pov$R)-min(cur_pov$R))
-  cur_pov$Tmax <- (cur_pov$Tmax - min(cur_pov$Tmax))/(max(cur_pov$Tmax)-min(cur_pov$Tmax))
-  povodi[[i]] <- cur_pov
-  rm(cur_pov,Qcamel,Rcamel)
-}
-
-names(povodi) <- c("salmon","bigsur","merced","dry","palm")
-
-mae <- function(mod, obs) {
-  if (length(mod) != length(obs)) {
-    stop("Vektory musí mít stejnou délku")
+  mae <- function(mod, obs) {
+    if (length(mod) != length(obs)) {
+      stop("Vektory musí mít stejnou délku")
+    }
+    err = 0
+    for (i in 1:length(mod)){
+      err = err + abs(mod[i] - obs[i])
+    }
+    err = err/length(mod)
+    return(err)
   }
-  err = 0
-  for (i in 1:length(mod)){
-    err = err + abs(mod[i] - obs[i])
+  
+  rmse <- function(mod, obs) {
+    if (length(mod) != length(obs)) {
+      stop("Vektory musí mít stejnou délku")
+    }
+    err = 0
+    for (i in 1:length(mod)){
+      err = err + (mod[i] - obs[i])^2
+    }
+    err = sqrt(err/length(mod))
+    return(err)
   }
-  err = err/length(mod)
-  return(err)
-}
-
-rmse <- function(mod, obs) {
-  if (length(mod) != length(obs)) {
-    stop("Vektory musí mít stejnou délku")
+  
+  nse <- function(mod, obs) {
+    if (length(mod) != length(obs)) {
+      stop("Vektory musí mít stejnou délku")
+    }
+    err = 0
+    cit = 0
+    jme = 0
+    for (i in 1:length(mod)){
+      cit = cit + (obs[i] - mod[i])^2
+      jme = jme + (obs[i] - mean(obs))^2
+    }
+    err = 1-(cit/length(mod))/(jme/length(mod))
+    return(err)
   }
-  err = 0
-  for (i in 1:length(mod)){
-    err = err + (mod[i] - obs[i])^2
+  
+  pi <- function(mod, obs) {
+    if (length(mod) != length(obs)) {
+      stop("Vektory musí mít stejnou délku")
+    }
+    err = 0
+    cit = 0
+    jme = 0
+    for (i in 2:length(mod)){
+      cit = cit + (obs[i] - mod[i])^2
+      jme = jme + (obs[i] - obs[i-1])^2
+    }
+    err = 1-(cit/length(mod))/(jme/length(mod))
+    return(err)
   }
-  err = sqrt(err/length(mod))
-  return(err)
-}
-
-nse <- function(mod, obs) {
-  if (length(mod) != length(obs)) {
-    stop("Vektory musí mít stejnou délku")
-  }
-  err = 0
-  cit = 0
-  jme = 0
-  for (i in 1:length(mod)){
-    cit = cit + (mod[i] - obs[i])^2
-    jme = jme + (mod[i] - mean(obs))^2
-  }
-  err = 1-(cit/length(mod))/(jme/length(mod))
-  return(err)
-}
-
+  
 }  # nacteni Rcpp, dat a funkce kriterii
 
 output_folder <- "D:/pokusydip/"
 x = 1
 vysl = data.frame()
-for(o in 1){
-for(n in 2){
-for(m in 1){
-for(l in 1){
-for(k in 1){
-for(j in 1){
-for(i in 3){
-  ker = 2+n
-  poc_ker = 10*m
-  roky_cal = 10+5*l
-  iter = 25*k
+vysl_cr = list()
+for(o in 3){
+for(n in c(3,5,7)){
+for(m in c(10,30,70)){
+for(l in c(10,20)){
+for(k in c(10,50,100)){
+for(i in 1){
+  ker = n
+  poc_ker = m
+  roky_cal = l
+  iter = k
   velic = o
   
   mlp <- udelej_nn()
@@ -466,116 +535,161 @@ for(i in 3){
   nn_cnn_1d_val(mlp,velic)
   vystupy <- nn_get_vystupy(mlp)
   
-  file_path <- file.path(output_folder, paste0(x, ".png"))
-  png(file_path, width = 800, height = 600) # Nastavení výstupního souboru
-  plot.new()
-  plot(
-    povodi[[i]]$Q[(roky_cal*365+1+ker):length(povodi[[i]]$Q)],
-    type = "l",
-    col = "black",
-    main = paste0("pokus=", j," povodi=",i," velic=",velic," ker=",ker, " poc=", poc_ker, " roky cal=", roky_cal, " iter=", iter),
-    sub = paste0(" mae=", mae(vystupy,povodi[[i]]$Q[(roky_cal*365+1+ker):length(povodi[[i]]$Q)]),
-                 " rmse=", rmse(vystupy,povodi[[i]]$Q[(roky_cal*365+1+ker):length(povodi[[i]]$Q)]),
-                 " nse=", nse(vystupy,povodi[[i]]$Q[(roky_cal*365+1+ker):length(povodi[[i]]$Q)]))
-    
+  
+  # Vytvoření datového rámce pro ggplot
+  df_plot <- data.frame(
+    Datum = povodi[[i]]$Datum[(roky_cal * 365 + 1 + ker):length(povodi[[i]]$Datum)],
+    Q_měřené = povodi[[i]]$Q[(roky_cal * 365 + 1 + ker):length(povodi[[i]]$Q)]*(minmax[i,2]-minmax[i,1])+minmax[i,1],
+    Q_modelované = vystupy*(minmax[i,2]-minmax[i,1])+minmax[i,1]
   )
-  lines(vystupy,col = "red")
-  dev.off() # Ukončení záznamu do souboru
+  
+  # Vytvoření ggplot objektu
+  plot <- ggplot(df_plot, aes(x = Datum)) +
+    geom_line(aes(y = Q_měřené, color = "Měřené"), linewidth = 0.6) +
+    geom_line(aes(y = Q_modelované, color = "Model"), linewidth = 0.45) +
+    scale_color_manual(values = c("Měřené" = "black", "Model" = "red")) +
+    labs(
+      title = paste0("povodi=", i, " velic=", velic, " ker=", ker, 
+                     " poc=", poc_ker, " roky cal=", roky_cal, " iter=", iter),
+      subtitle = paste0(
+        "mae=", round(mae(df_plot$Q_modelované, df_plot$Q_měřené),3), 
+        "    rmse=", round(rmse(df_plot$Q_modelované, df_plot$Q_měřené),3), 
+        "    nse=", round(nse(df_plot$Q_modelované, df_plot$Q_měřené),3), 
+        "    pi=", round(pi(df_plot$Q_modelované, df_plot$Q_měřené),3)
+      ),
+      x = NULL,
+      y = "Q [m3/s]",
+      colour = NULL
+    ) +
+    theme_minimal() +
+    theme(
+      legend.position = "bottom",
+      plot.title = element_text(size = 14, face = "bold"),
+      plot.subtitle = element_text(size = 10)
+    )
+  
+  cur_id = paste0(i,"_",velic,"_",ker,"_",poc_ker,"_",roky_cal,"_",iter)
+  # Uložení grafu do souboru
+  file_path <- file.path(output_folder, paste0(cur_id, ".png"))
+  ggsave(file_path, plot = plot, width = 8, height = 6, dpi = 300, bg = "white")
+  
+  
   print(x)
-  vysl[x,1] = j
-  vysl[x,2] = i
-  vysl[x,3] = velic
-  vysl[x,4] = ker
-  vysl[x,5] = poc_ker
-  vysl[x,6] = roky_cal
-  vysl[x,7] = iter
-  vysl[x,8] = mae(vystupy,povodi[[i]]$Q[(roky_cal*365+1+ker):length(povodi[[i]]$Q)])
-  vysl[x,9] = rmse(vystupy,povodi[[i]]$Q[(roky_cal*365+1+ker):length(povodi[[i]]$Q)])
-  vysl[x,10] = nse(vystupy,povodi[[i]]$Q[(roky_cal*365+1+ker):length(povodi[[i]]$Q)])
+  vysl[x,1] = names_povodi[i]
+  vysl[x,2] = velic
+  vysl[x,3] = ker
+  vysl[x,4] = poc_ker
+  vysl[x,5] = roky_cal
+  vysl[x,6] = iter
+  vysl[x,7] = round(mae(df_plot$Q_modelované,df_plot$Q_měřené),3)
+  vysl[x,8] = round(rmse(df_plot$Q_modelované,df_plot$Q_měřené),3)
+  vysl[x,9] = round(nse(df_plot$Q_modelované,df_plot$Q_měřené),3)
+  vysl[x,10] = round(pi(df_plot$Q_modelované,df_plot$Q_měřené),3)
+  vysl[x,11] = x
+  vysl[x,12] = cur_id
+  
+  vysl_cr[[x]] <- df_plot
   x= x+1
-}}}}}}}
-names(vysl) = c("pokus","povodi","velic","ker","poc","roky_cal","iter","mae","rmse","nse")
-vysl[vysl$nse == max(vysl$nse),]
-vysl[vysl$rmse == min(vysl$rmse),]
-vysl[vysl$mae == min(vysl$mae),]
-vysl[vysl$nse>0.5&vysl$povodi==2,]
+}}}}}}
+names(vysl) = c("povodi","velic","ker","poc","roky_cal","iter","mae","rmse","nse","pi","x","id")
+saveRDS(vysl,"D:/pokusydip/vysl.rds")
+saveRDS(vysl_cr,"D:/pokusydip/vysl_cr.rds")
 
 #########################################################################################x
 #########################         FULL CNN          #####################################
 #########################################################################################
 
 {library(Rcpp)
-setwd("C:/Users/danek/Desktop/mlpR/vsnn")
-
-Rcpp::sourceCpp("rcppstuff.cpp")
-povodi <- list()
-for(i in 1:5){
+  setwd("C:/Users/danek/Desktop/mlpR/vsnn")
+  library(ggplot2)
+  Rcpp::sourceCpp("rcppstuff.cpp")
+  povodi <- list()
+  minmax <- data.frame()
+  for(i in 1:5){
+    Qcamel <- read.table(paste0("./vyberdata/",i,"_q.txt"), header=FALSE)
+    Qcamel <- Qcamel[!(Qcamel$V3 == 2 & Qcamel$V4 == 29), ]  
+    Rcamel <- read.table(paste0("./vyberdata/",i,"_r.txt"), header=FALSE, skip = 4)
+    Rcamel <- Rcamel[!(Rcamel$V2 == 2 & Rcamel$V3 == 29), ]  
+    cur_pov <- data.frame(Datum = as.Date(paste(Rcamel$V1,Rcamel$V2,Rcamel$V3, sep = "-")),
+                          Q = (Qcamel$V5 * 0.0283168466), R = Rcamel$V6, Tmax = Rcamel$V9)
+    minmax[i,1] = min(cur_pov$Q)
+    minmax[i,2] = max(cur_pov$Q)
+    cur_pov$Q <- (cur_pov$Q - min(cur_pov$Q))/(max(cur_pov$Q)-min(cur_pov$Q))
+    cur_pov$R <- (cur_pov$R - min(cur_pov$R))/(max(cur_pov$R)-min(cur_pov$R))
+    cur_pov$Tmax <- (cur_pov$Tmax - min(cur_pov$Tmax))/(max(cur_pov$Tmax)-min(cur_pov$Tmax))
+    povodi[[i]] <- cur_pov
+    rm(cur_pov,Qcamel,Rcamel)
+  }
+  names(minmax) <- c("minQ","maxQ")
+  names_povodi <- c("salmon","bigsur","merced","arroyo","andreas")
+  names(povodi) <- names_povodi
   
-  Qcamel <- read.table(paste0("./vyberdata/",i,"_q.txt"), header=FALSE)
-  Qcamel <- Qcamel[!(Qcamel$V3 == 2 & Qcamel$V4 == 29), ]  
-  Rcamel <- read.table(paste0("./vyberdata/",i,"_r.txt"), header=FALSE, skip = 4)
-  Rcamel <- Rcamel[!(Rcamel$V2 == 2 & Rcamel$V3 == 29), ]  
-  cur_pov <- data.frame(Q = (Qcamel$V5 * 0.0283168466), R = Rcamel$V6, Tmax = Rcamel$V9)
-  cur_pov$Q <- (cur_pov$Q - min(cur_pov$Q))/(max(cur_pov$Q)-min(cur_pov$Q))
-  cur_pov$R <- (cur_pov$R - min(cur_pov$R))/(max(cur_pov$R)-min(cur_pov$R))
-  cur_pov$Tmax <- (cur_pov$Tmax - min(cur_pov$Tmax))/(max(cur_pov$Tmax)-min(cur_pov$Tmax))
-  povodi[[i]] <- cur_pov
-  rm(cur_pov,Qcamel,Rcamel)
-}
-
-names(povodi) <- c("salmon","bigsur","merced","dry","palm")
-
-mae <- function(mod, obs) {
-  if (length(mod) != length(obs)) {
-    stop("Vektory musí mít stejnou délku")
+  mae <- function(mod, obs) {
+    if (length(mod) != length(obs)) {
+      stop("Vektory musí mít stejnou délku")
+    }
+    err = 0
+    for (i in 1:length(mod)){
+      err = err + abs(mod[i] - obs[i])
+    }
+    err = err/length(mod)
+    return(err)
   }
-  err = 0
-  for (i in 1:length(mod)){
-    err = err + abs(mod[i] - obs[i])
+  
+  rmse <- function(mod, obs) {
+    if (length(mod) != length(obs)) {
+      stop("Vektory musí mít stejnou délku")
+    }
+    err = 0
+    for (i in 1:length(mod)){
+      err = err + (mod[i] - obs[i])^2
+    }
+    err = sqrt(err/length(mod))
+    return(err)
   }
-  err = err/length(mod)
-  return(err)
-}
-
-rmse <- function(mod, obs) {
-  if (length(mod) != length(obs)) {
-    stop("Vektory musí mít stejnou délku")
+  
+  nse <- function(mod, obs) {
+    if (length(mod) != length(obs)) {
+      stop("Vektory musí mít stejnou délku")
+    }
+    err = 0
+    cit = 0
+    jme = 0
+    for (i in 1:length(mod)){
+      cit = cit + (obs[i] - mod[i])^2
+      jme = jme + (obs[i] - mean(obs))^2
+    }
+    err = 1-(cit/length(mod))/(jme/length(mod))
+    return(err)
   }
-  err = 0
-  for (i in 1:length(mod)){
-    err = err + (mod[i] - obs[i])^2
+  
+  pi <- function(mod, obs) {
+    if (length(mod) != length(obs)) {
+      stop("Vektory musí mít stejnou délku")
+    }
+    err = 0
+    cit = 0
+    jme = 0
+    for (i in 2:length(mod)){
+      cit = cit + (obs[i] - mod[i])^2
+      jme = jme + (obs[i] - obs[i-1])^2
+    }
+    err = 1-(cit/length(mod))/(jme/length(mod))
+    return(err)
   }
-  err = sqrt(err/length(mod))
-  return(err)
-}
-
-nse <- function(mod, obs) {
-  if (length(mod) != length(obs)) {
-    stop("Vektory musí mít stejnou délku")
-  }
-  err = 0
-  cit = 0
-  jme = 0
-  for (i in 1:length(mod)){
-    cit = cit + (mod[i] - obs[i])^2
-    jme = jme + (mod[i] - mean(obs))^2
-  }
-  err = 1-(cit/length(mod))/(jme/length(mod))
-  return(err)
-}
-
+  
 }  # nacteni Rcpp, dat a funkce kriterii
 
 output_folder <- "D:/pokusydip/"
 x = 1
 vysl = data.frame()
+vysl_cr = list()
 
-for(j in 1){
 for(i in 3){
   iter = 1
   
   mlp <- udelej_nn()
-  nn_init_nn(mlp,50,c(50,50,1))
+  nn_init_nn(mlp,50,c(50,50,20))
   nn_set_vstup_rady(mlp, povodi[[i]]$Q[1:600],
                     povodi[[i]]$Q[601:12000], 
                     povodi[[i]]$R[1:600],
@@ -587,33 +701,54 @@ for(i in 3){
   nn_cnn_full_val(mlp)
   vystupy <- nn_get_vystupy(mlp)
   
-  file_path <- file.path(output_folder, paste0(x, ".png"))
-  png(file_path, width = 800, height = 600) # Nastavení výstupního souboru
-  plot.new()
-  plot(
-    povodi[[i]]$Q[povodi[[i]]$Q[1001:12020]],
-    type = "l",
-    col = "black",
-    main = paste0("pokus=", j," povodi=",i," iter=", iter),
-    sub = paste0(" mae=", mae(vystupy,povodi[[i]]$Q[1001:12020]),
-                 " rmse=", rmse(vystupy,povodi[[i]]$Q[1001:12020]),
-                 " nse=", nse(vystupy,povodi[[i]]$Q[1001:12020]))
-    
+  # Vytvoření datového rámce pro ggplot
+  df_plot <- data.frame(
+    Datum = povodi[[i]]$Datum[1001:12020],
+    Q_měřené = povodi[[i]]$Q[1001:12020]*(minmax[i,2]-minmax[i,1])+minmax[i,1],
+    Q_modelované = vystupy*(minmax[i,2]-minmax[i,1])+minmax[i,1]
   )
-  lines(vystupy,col = "red")
-  dev.off() # Ukončení záznamu do souboru
+  
+  # Vytvoření ggplot objektu
+  plot <- ggplot(df_plot, aes(x = Datum)) +
+    geom_line(aes(y = Q_měřené, color = "Měřené"), linewidth = 0.6) +
+    geom_line(aes(y = Q_modelované, color = "Model"), linewidth = 0.45) +
+    scale_color_manual(values = c("Měřené" = "black", "Model" = "red")) +
+    labs(
+      title = paste0("povodi=", i, " iter=", iter),
+      subtitle = paste0(
+        "mae=", round(mae(df_plot$Q_modelované, df_plot$Q_měřené),3), 
+        "    rmse=", round(rmse(df_plot$Q_modelované, df_plot$Q_měřené),3), 
+        "    nse=", round(nse(df_plot$Q_modelované, df_plot$Q_měřené),3), 
+        "    pi=", round(pi(df_plot$Q_modelované, df_plot$Q_měřené),3)
+      ),
+      x = NULL,
+      y = "Q [m3/s]",
+      colour = NULL
+    ) +
+    theme_minimal() +
+    theme(
+      legend.position = "bottom",
+      plot.title = element_text(size = 14, face = "bold"),
+      plot.subtitle = element_text(size = 10)
+    )
+  
+  cur_id = paste0(i,"_",iter,"_f")
+  # Uložení grafu do souboru
+  file_path <- file.path(output_folder, paste0(cur_id, ".png"))
+  ggsave(file_path, plot = plot, width = 8, height = 6, dpi = 300, bg = "white")
+  
   print(x)
-  vysl[x,1] = j
-  vysl[x,2] = i
-  vysl[x,3] = iter
-  vysl[x,4] = mae(vystupy,povodi[[i]]$Q[1001:12020])
-  vysl[x,5] = rmse(vystupy,povodi[[i]]$Q[1001:12020])
-  vysl[x,6] = nse(vystupy,povodi[[i]]$Q[1001:12020])
+  vysl[x,1] = i
+  vysl[x,2] = iter
+  vysl[x,3] = round(mae(df_plot$Q_modelované,df_plot$Q_měřené),3)
+  vysl[x,4] = round(rmse(df_plot$Q_modelované,df_plot$Q_měřené),3)
+  vysl[x,5] = round(nse(df_plot$Q_modelované,df_plot$Q_měřené),3)
+  vysl[x,6] = round(pi(df_plot$Q_modelované,df_plot$Q_měřené),3)
+  vysl[x,7] = x
+  vysl[x,8] = cur_id
   x= x+1
-}}
-names(vysl) = c("pokus","povodi","iter","mae","rmse","nse")
-vysl[vysl$nse == max(vysl$nse),]
-vysl[vysl$rmse == min(vysl$rmse),]
-vysl[vysl$mae == min(vysl$mae),]
-vysl[is.na(vysl$nse)==FALSE&vysl$nse>0.952,]
+}
+names(vysl) = c("povodi","iter","mae","rmse","nse","pi","x","id")
+saveRDS(vysl,"D:/pokusydip/vysl.rds")
+saveRDS(vysl_cr,"D:/pokusydip/vysl_cr.rds")
 
