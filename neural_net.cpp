@@ -865,9 +865,8 @@ for(int ite = 0;ite<iter;++ite){
             vystupy = pom_vystup;
 
 ///////////// MLP BACKPROP
-        count_cost();
         for(int i = 0;i<rozmery[pocet_vrstev-1];i++){
-            sit[pocet_vrstev-1][i].delta = cost;
+            sit[pocet_vrstev-1][i].delta = vystupy[i] - chtenejout[i];
         }
 
         for(int j = (pocet_vrstev-2); j>=0;--j){
