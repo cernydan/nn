@@ -6,7 +6,6 @@
 
     Matice<double> max_pool(Matice<double> vstupnim, size_t oknorad, size_t oknosl);
     Matice<double> max_pool_fullstep(Matice<double> vstupnim, size_t oknorad, size_t oknosl);
-    Tenzor<double> max_pool_fullstep_3d(Tenzor<double> vstupnim, size_t oknorad, size_t oknosl);
     Matice<double> avg_pool(Matice<double> vstupnim, size_t oknorad, size_t oknosl);
 
     Matice<double> udelej_api(int n, double beta, Co coze, int kolik);

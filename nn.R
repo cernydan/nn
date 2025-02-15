@@ -361,9 +361,9 @@ vysl = data.frame()
 vysl_cr = list()
 for(n in c(2,3,5)){
 for(m in c(3,5,7)){
-for(l in c(10,30,70)){
-for(k in c(10,20)){
-for(j in c(10,50,100)){
+for(l in c(10,30,50)){
+for(k in c(20)){           ### PRO 3.pov 10
+for(j in c(200,500)){
 for(i in 5){
   row_ker = n
   col_ker = m
@@ -442,8 +442,18 @@ for(i in 5){
 names(vysl) = c("povodi","row_ker","col_ker","poc","roky_cal","iter","mae","rmse","nse","pi","x","id")
 saveRDS(vysl,"D:/pokusydip/vysl.rds")
 saveRDS(vysl_cr,"D:/pokusydip/vysl_cr.rds")
-andrvyslted[andrvyslted$pi>0,]
-andrvyslted = readRDS("D:/pokusydip/pov1_1D_velic1/vysl.rds")
+vysl[vysl$pi>0,]
+
+library(xtable)
+
+xtable(tbl5,digits = c(0,0,0,0,0,0,3,3,3,3,0),include.rownames = FALSE)
+tbl5 <- vysl[,c(2,3,4,5,6,7,8,9,10,12)]
+tbl5 <- tbl5[order(tbl5$row_ker, tbl5$col_ker,tbl5$poc,tbl5$roky_cal,tbl5$iter), ]
+tbl5$id <- gsub("DD$", "2D", tbl5$id)
+tbl5[tbl5$nse == max(tbl5$nse),]
+tbl5[tbl5$pi == max(tbl5$pi),]
+
+print(xtable(tbl5,digits = c(0,0,0,0,0,0,3,3,3,3,0)),include.rownames = FALSE, add.to.row = list(pos = list(1:(nrow(tbl5)-1)), command = "\\hline "))
 
 #########################################################################################x
 #########################         1D CNN          #####################################
@@ -534,12 +544,12 @@ output_folder <- "D:/pokusydip/"
 x = 1
 vysl = data.frame()
 vysl_cr = list()
-for(o in 1){
+for(o in 2){
 for(n in c(3,5,7,14)){
 for(m in c(10,30,50)){
 for(l in c(10,20)){
 for(k in c(100,200,500)){
-for(i in 4){
+for(i in 1){
 
   ker = n
   poc_ker = m
@@ -710,17 +720,17 @@ output_folder <- "D:/pokusydip/"
 x = 1
 vysl = data.frame()
 vysl_cr = list()
-for(i in 3){
-  iter = 5
+for(i in 1:5){
+  iter = 500
   
   mlp <- udelej_nn()
-  nn_init_nn(mlp,50,c(50,50,20))
-  nn_set_vstup_rady(mlp, povodi[[i]]$Q[1:1000],
-                    povodi[[i]]$Q[1001:12000], 
-                    povodi[[i]]$R[1:1000],
-                    povodi[[i]]$R[1001:12000], 
-                    povodi[[i]]$Tmax[1:1000],
-                    povodi[[i]]$Tmax[1001:12000]
+  nn_init_nn(mlp,50,c(50,50,6))
+  nn_set_vstup_rady(mlp, povodi[[i]]$Q[1:6000],
+                    povodi[[i]]$Q[6001:12000], 
+                    povodi[[i]]$R[1:6000],
+                    povodi[[i]]$R[6001:12000], 
+                    povodi[[i]]$Tmax[1:6000],
+                    povodi[[i]]$Tmax[6001:12000]
   )
   nn_cnn_full_cal(mlp,iter)
   nn_cnn_full_val(mlp)
@@ -728,8 +738,8 @@ for(i in 3){
 
   # Vytvoření datového rámce pro ggplot
   df_plot <- data.frame(
-    Datum = povodi[[i]]$Datum[1421:12020],
-    Q_měřené = povodi[[i]]$Q[1421:12020]*(minmax[i,2]-minmax[i,1])+minmax[i,1],
+    Datum = povodi[[i]]$Datum[6043:12006],
+    Q_měřené = povodi[[i]]$Q[6043:12006]*(minmax[i,2]-minmax[i,1])+minmax[i,1],
     Q_modelované = vystupy*(minmax[i,2]-minmax[i,1])+minmax[i,1]
   )
   

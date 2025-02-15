@@ -137,33 +137,6 @@ Matice<double> NN::max_pool_fullstep(Matice<double> vstupnim, size_t oknorad, si
     return vystupm;
 }
 
-Tenzor<double> NN::max_pool_fullstep_3d(Tenzor<double> vstupnim, size_t oknorad, size_t oknosl){
-    size_t radky = vstupnim.getRows()/oknorad;
-    size_t sloupce = vstupnim.getCols()/oknosl;
-    size_t vrstvy = vstupnim.getDepth();
-    Tenzor<double>vystupm(vrstvy,radky,sloupce);
-    double tedmax;
-    for (int hl = 0;hl<vrstvy;++hl){
-        for(int i = 0;i<radky;i++){
-            for(int j = 0;j<sloupce;j++){
-                for(int k = 0;k<oknorad;k++){
-                    for(int l = 0;l<oknosl;l++){
-                        if(k==0 and l == 0){
-                            tedmax = vstupnim.getElement(hl,i*oknorad,j*oknosl);
-                        }else{
-                            if(tedmax<vstupnim.getElement(hl,i*oknorad+k,j*oknosl+l)){
-                                tedmax = vstupnim.getElement(hl,i*oknorad+k,j*oknosl+l);
-                            }
-                        }
-                    }
-                }
-                vystupm.setElement(hl,i,j,tedmax);
-            }
-        }
-    }
-    return vystupm;
-}
-
 Matice<double> NN::avg_pool(Matice<double> vstupnim, size_t oknorad, size_t oknosl){
     size_t radky = vstupnim.getRows()-oknorad+1;
     size_t sloupce = vstupnim.getCols()-oknosl+1;

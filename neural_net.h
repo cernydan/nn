@@ -63,6 +63,7 @@ public:
                         const std::vector<double>& Tkal_in, const std::vector<double>& Tval_in);
     Matice<double> udelej_radky(size_t velrad, const std::vector<double>& cr);
     Matice<double> udelej_lag(size_t lag,const std::vector<double>& cr);
+    Tenzor<double> max_pool_fullstep_3d(Tenzor<double> vstupnim, size_t oknorad, size_t oknosl);
     double tanh(double x);
 
     void cnn_full_cal(int iter);
@@ -77,9 +78,9 @@ public:
     std::vector<double> biaskonv_onfly;
 
     Tenzor<double> kernely_full_1;
-    Tenzor<double> kernely_full_2s;
-    Tenzor<double> kernely_full_3;
-    Tenzor<double> kernely_full_4s;
+    Tenzor<double> kernely_full_2;
+    std::vector<double> bias_full_k1;
+    std::vector<double> bias_full_k2;
 
 
     std::vector<double> Q_kal_vstup;
