@@ -41,8 +41,6 @@ public:
     Tenzor<double> konvo_fullstep_3d(Tenzor<double> vstupnt, Tenzor<double> vstupker);
     Tenzor<double> konvo_fullstep_3d_1by1(Tenzor<double> vstupnt, Tenzor<double> vstupker);
 
-    Matice<double> dataprocnn;
-
     void print_vystup();
     void print_nn();
     void init_sit(int poc_vstupu, const std::vector<int>& rozmers);
@@ -77,10 +75,19 @@ public:
     Matice<double> biaskonv_1D;
     std::vector<double> biaskonv_onfly;
 
-    Tenzor<double> kernely_full_1;
-    Tenzor<double> kernely_full_2;
-    std::vector<double> bias_full_k1;
-    std::vector<double> bias_full_k2;
+    Tenzor<double> kernely_full_1_Q;
+    Tenzor<double> kernely_full_2_Q;
+    std::vector<double> bias_full_k1_Q;
+    std::vector<double> bias_full_k2_Q;
+    Tenzor<double> kernely_full_1_R;
+    Tenzor<double> kernely_full_2_R;
+    std::vector<double> bias_full_k1_R;
+    std::vector<double> bias_full_k2_R;
+    Tenzor<double> kernely_full_1_T;
+    Tenzor<double> kernely_full_2_T;
+    std::vector<double> bias_full_k1_T;
+    std::vector<double> bias_full_k2_T;
+
 
 
     std::vector<double> Q_kal_vstup;
