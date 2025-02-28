@@ -132,7 +132,7 @@ void Neuron::set_vstupy(const std::vector<double>& inputs) {
 void Neuron::set_randomvahy(){
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_real_distribution<> dis(0.0, 0.1);
+    std::normal_distribution<> dis(0.0, std::sqrt(2.0 / vstupy.size()));
 
          vahy.clear();
         for (int i = 0; i < vstupy.size(); ++i) {
