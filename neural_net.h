@@ -35,11 +35,11 @@ public:
     std::vector<std::vector<double>> train_data;
     std::vector<std::vector<double>> val_data;
     
-    Matice<double> konvo(Matice<double> vstupnim, Matice<double> vstupkernel);
-    Tenzor<double> konvo_3d(Tenzor<double> vstupnim, Tenzor<double> vstupkernel);
-    Matice<double> konvo_fullstep(Matice<double> vstupnim, Matice<double> vstupkernel);
-    Tenzor<double> konvo_fullstep_3d(Tenzor<double> vstupnt, Tenzor<double> vstupker);
-    Tenzor<double> konvo_fullstep_3d_1by1(Tenzor<double> vstupnt, Tenzor<double> vstupker);
+    Matice<double> konvo(Matice<double>& vstupnim, Matice<double>& vstupkernel);
+    Tenzor<double> konvo_3d(Tenzor<double>& vstupnim, Tenzor<double>& vstupkernel);
+    Matice<double> konvo_fullstep(Matice<double>& vstupnim, Matice<double>& vstupkernel);
+    Tenzor<double> konvo_fullstep_3d(Tenzor<double>& vstupnt, Tenzor<double>& vstupker);
+    Tenzor<double> konvo_fullstep_3d_1by1(Tenzor<double>& vstupnt, Tenzor<double>& vstupker);
 
     void print_vystup();
     void print_nn();
@@ -61,24 +61,36 @@ public:
                         const std::vector<double>& Tkal_in, const std::vector<double>& Tval_in);
     Matice<double> udelej_radky(size_t velrad, const std::vector<double>& cr);
     Matice<double> udelej_lag(size_t lag,const std::vector<double>& cr);
-    Tenzor<double> max_pool_fullstep_3d(Tenzor<double> vstupnim, size_t oknorad, size_t oknosl);
+    Tenzor<double> max_pool_fullstep_3d(Tenzor<double>& vstupnim, size_t oknorad, size_t oknosl);
     double tanh(double x);
 
-    void cnn_full_cal(int iter);
-    void cnn_full_val();
+    void cnn_full_cal(int iter,int velic);
+    void cnn_full_val(int velic);
     void cnn1D_cal(size_t vel_ker, size_t poc_ker, int iter, int velic);
     void cnn1D_val(int velic);
-    void cnnonfly_cal(size_t row_ker, size_t col_ker, size_t poc_ker, int iter);
-    void cnnonfly_val();
-    Tenzor<double> kernely_onfly;
+    void cnnonfly_cal(size_t row_ker, size_t col_ker, size_t poc_ker, int iter, int velic);
+    void cnnonfly_val(int velic);
+    Tenzor<double> kernely_onfly_Q;
+    Tenzor<double> kernely_onfly_R;
+    Tenzor<double> kernely_onfly_T;
     Tenzor<double> kernely_1D;
     Matice<double> biaskonv_1D;
-    std::vector<double> biaskonv_onfly;
+    std::vector<double> biaskonv_onfly_Q;
+    std::vector<double> biaskonv_onfly_R;
+    std::vector<double> biaskonv_onfly_T;
 
-    Tenzor<double> kernely_full_1;
-    Tenzor<double> kernely_full_2;
-    std::vector<double> bias_full_k1;
-    std::vector<double> bias_full_k2;
+    Tenzor<double> kernely_full_1_Q;
+    Tenzor<double> kernely_full_2_Q;
+    std::vector<double> bias_full_k1_Q;
+    std::vector<double> bias_full_k2_Q;
+    Tenzor<double> kernely_full_1_R;
+    Tenzor<double> kernely_full_2_R;
+    std::vector<double> bias_full_k1_R;
+    std::vector<double> bias_full_k2_R;
+    Tenzor<double> kernely_full_1_T;
+    Tenzor<double> kernely_full_2_T;
+    std::vector<double> bias_full_k1_T;
+    std::vector<double> bias_full_k2_T;
 
     std::vector<double> Q_kal_vstup;
     std::vector<double> R_kal_vstup;

@@ -155,13 +155,13 @@ void nn_shuffle_train(Rcpp::XPtr<NN> nn){
 }
 
 //[[Rcpp::export]]
-void nn_cnn_onfly_cal(Rcpp::XPtr<NN> nn,size_t row_ker,size_t col_ker, size_t poc_ker,int iters){
-    nn->cnnonfly_cal(row_ker,col_ker, poc_ker, iters);
+void nn_cnn_onfly_cal(Rcpp::XPtr<NN> nn,size_t row_ker,size_t col_ker, size_t poc_ker,int iters, int velic){
+    nn->cnnonfly_cal(row_ker,col_ker, poc_ker, iters,velic);
 }
 
 //[[Rcpp::export]]
-void nn_cnn_onfly_val(Rcpp::XPtr<NN> nn){
-    nn->cnnonfly_val();
+void nn_cnn_onfly_val(Rcpp::XPtr<NN> nn, int velic){
+    nn->cnnonfly_val(velic);
 }
 
 //[[Rcpp::export]]
@@ -175,11 +175,11 @@ void nn_cnn_1d_val(Rcpp::XPtr<NN> nn, int velic){
 }
 
 //[[Rcpp::export]]
-void nn_cnn_full_cal(Rcpp::XPtr<NN> nn,int iters){
-    nn->cnn_full_cal(iters);
+void nn_cnn_full_cal(Rcpp::XPtr<NN> nn,int iters, int velic){
+    nn->cnn_full_cal(iters,velic);
 }
 
 //[[Rcpp::export]]
-void nn_cnn_full_val(Rcpp::XPtr<NN> nn){
-    nn->cnn_full_val();
+void nn_cnn_full_val(Rcpp::XPtr<NN> nn, int velic){
+    nn->cnn_full_val(velic);
 }

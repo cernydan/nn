@@ -48,11 +48,11 @@ error}
     Rcamel <- Rcamel[!(Rcamel$V2 == 2 & Rcamel$V3 == 29), ]  
     cur_pov <- data.frame(Datum = as.Date(paste(Rcamel$V1,Rcamel$V2,Rcamel$V3, sep = "-")),
                           Q = (Qcamel$V5 * 0.0283168466), R = Rcamel$V6, Tmax = Rcamel$V9)
-    minmax[i,1] = min(cur_pov$Q)
-    minmax[i,2] = max(cur_pov$Q)
-    cur_pov$Q <- (cur_pov$Q - min(cur_pov$Q))/(max(cur_pov$Q)-min(cur_pov$Q))
-    cur_pov$R <- (cur_pov$R - min(cur_pov$R))/(max(cur_pov$R)-min(cur_pov$R))
-    cur_pov$Tmax <- (cur_pov$Tmax - min(cur_pov$Tmax))/(max(cur_pov$Tmax)-min(cur_pov$Tmax))
+    minmax[i,1] = mean(cur_pov$Q)
+    minmax[i,2] = sd(cur_pov$Q)
+    cur_pov$Q <- (cur_pov$Q - mean(cur_pov$Q))/sd(cur_pov$Q)
+    cur_pov$R <- (cur_pov$R - mean(cur_pov$R))/sd(cur_pov$R)
+    cur_pov$Tmax <- (cur_pov$Tmax - mean(cur_pov$Tmax))/sd(cur_pov$Tmax)
     povodi[[i]] <- cur_pov
     rm(cur_pov,Qcamel,Rcamel)
   }
@@ -122,10 +122,10 @@ vysl = data.frame()
 vysl_cr = list()
 for(o in 1){
 for(m in c(5,10)){
-  for(l in c(10,20)){
+  for(l in c(15)){
   for(k in c(20,50)){
-    for(j in c(3,5)){
-    for(i in 5){
+    for(j in c(3,5,7)){
+    for(i in 1:5){
       poc_neur = m
       roky_cal = l
       iter = k
@@ -133,17 +133,25 @@ LAG = j
 
 Qkal = povodi[[i]]$Q[1:(roky_cal*365)]
 Qval = povodi[[i]]$Q[(roky_cal*365+1):length(povodi[[i]]$Q)]
+Rkal = povodi[[i]]$R[1:(roky_cal*365)]
+Rval = povodi[[i]]$R[(roky_cal*365+1):length(povodi[[i]]$R)]
+Tkal = povodi[[i]]$Tmax[1:(roky_cal*365)]
+Tval = povodi[[i]]$Tmax[(roky_cal*365+1):length(povodi[[i]]$R)]
 
-dt = matrix(0, nrow = (length(Qkal)-LAG), ncol = LAG )
-for (n in 1:LAG){ dt[,n] = Qkal[(LAG-n+1):(length(Qkal)-n)] }
+dt = matrix(0, nrow = (length(Qkal)-LAG), ncol = 3*LAG)
+for (n in 1:LAG){ dt[,n] = Qkal[(LAG-n+1):(length(Qkal)-n)] 
+dt[,(n+LAG)] = Rkal[(LAG-n+1):(length(Rkal)-n)]
+dt[,(n+2*LAG)] = Tkal[(LAG-n+1):(length(Tkal)-n)]}
 chtenejout = Qkal[(LAG+1):length(Qkal)]
 
-dt2 = matrix(0, nrow = (length(Qval)-LAG), ncol = LAG )
-for (n in 1:LAG){ dt2[,n] = Qval[(LAG-n+1):(length(Qval)-n)] }
+dt2 = matrix(0, nrow = (length(Qval)-LAG), ncol = 3*LAG)
+for (n in 1:LAG){ dt2[,n] = Qval[(LAG-n+1):(length(Qval)-n)] 
+dt2[,(n+LAG)] = Rval[(LAG-n+1):(length(Rval)-n)]
+dt2[,(n+2*LAG)] = Tval[(LAG-n+1):(length(Tval)-n)]}
 
 
 mlp <- udelej_nn()
-nn_init_nn(mlp,LAG,c(poc_neur,poc_neur,1))
+nn_init_nn(mlp,ncol(dt),c(poc_neur,poc_neur,1))
 nn_set_chtenejout(mlp,chtenejout)
 nn_set_traindata(mlp,dt)
 nn_online_bp_adam(mlp,iter)
@@ -154,8 +162,8 @@ vystupy <- nn_get_vystupy(mlp)
 # Vytvoření datového rámce pro ggplot
 df_plot <- data.frame(
   Datum = povodi[[i]]$Datum[(roky_cal * 365 + 1 + LAG):length(povodi[[i]]$Datum)],
-  Q_měřené = povodi[[i]]$Q[(roky_cal * 365 + 1 + LAG):length(povodi[[i]]$Q)]*(minmax[i,2]-minmax[i,1])+minmax[i,1],
-  Q_modelované = vystupy*(minmax[i,2]-minmax[i,1])+minmax[i,1]
+  Q_měřené = povodi[[i]]$Q[(roky_cal * 365 + 1 + LAG):length(povodi[[i]]$Q)]*minmax[i,2]+minmax[i,1],
+  Q_modelované = vystupy*minmax[i,2]+minmax[i,1]
 )
 
 # Vytvoření ggplot objektu
@@ -203,10 +211,11 @@ vysl[x,11] = cur_id
 
 vysl_cr[[x]] <- df_plot
 x= x+1
-}}}}}}
 names(vysl) = c("povodi","LAG","poc_neur","iter","roky_cal","mae","rmse","nse","pi","x","id")
 saveRDS(vysl,"D:/pokusydip/vysl.rds")
 saveRDS(vysl_cr,"D:/pokusydip/vysl_cr.rds")
+}}}}}}
+
 vysl[vysl$pi == max(vysl$pi,na.rm = TRUE),]
 vysl[vysl$pi >0,]
 
@@ -220,6 +229,7 @@ vyslneco[vyslneco$pi>0,]
 vyslneco <- readRDS("D:/pokusydip/ANN/norm pov5/vysl.rds")
 vyslneco <- vyslneco[order(vyslneco$LAG,vyslneco$poc_neur,vyslneco$iter,vyslneco$roky_cal),]
 write_xlsx(vyslneco, "D:/pokusydip/ANN/norm pov1/tabul.xlsx")
+
 #########################################################################################x
 #########################         1D CNN    DOPLN   #####################################
 #########################################################################################
@@ -237,11 +247,11 @@ write_xlsx(vyslneco, "D:/pokusydip/ANN/norm pov1/tabul.xlsx")
     Rcamel <- Rcamel[!(Rcamel$V2 == 2 & Rcamel$V3 == 29), ]  
     cur_pov <- data.frame(Datum = as.Date(paste(Rcamel$V1,Rcamel$V2,Rcamel$V3, sep = "-")),
                           Q = (Qcamel$V5 * 0.0283168466), R = Rcamel$V6, Tmax = Rcamel$V9)
-    minmax[i,1] = min(cur_pov$Q)
-    minmax[i,2] = max(cur_pov$Q)
-    cur_pov$Q <- (cur_pov$Q - min(cur_pov$Q))/(max(cur_pov$Q)-min(cur_pov$Q))
-    cur_pov$R <- (cur_pov$R - min(cur_pov$R))/(max(cur_pov$R)-min(cur_pov$R))
-    cur_pov$Tmax <- (cur_pov$Tmax - min(cur_pov$Tmax))/(max(cur_pov$Tmax)-min(cur_pov$Tmax))
+    minmax[i,1] = mean(cur_pov$Q)
+    minmax[i,2] = sd(cur_pov$Q)
+    cur_pov$Q <- (cur_pov$Q - mean(cur_pov$Q))/sd(cur_pov$Q)
+    cur_pov$R <- (cur_pov$R - mean(cur_pov$R))/sd(cur_pov$R)
+    cur_pov$Tmax <- (cur_pov$Tmax - mean(cur_pov$Tmax))/sd(cur_pov$Tmax)
     povodi[[i]] <- cur_pov
     rm(cur_pov,Qcamel,Rcamel)
   }
@@ -304,18 +314,17 @@ write_xlsx(vyslneco, "D:/pokusydip/ANN/norm pov1/tabul.xlsx")
   }
   
 }  # nacteni Rcpp, dat a funkce kriterii
-
 output_folder <- "D:/pokusydip/"
 x = 1
 vysl = data.frame()
 vysl_cr = list()
-for(q in 1:5){
-for(o in 2){
-  for(n in c(3,4,5)){
-    for(m in c(10,30,50)){
-      for(l in c(7)){
-        for(k in c(500)){
-          for(i in 1){
+for(q in 1){
+for(o in 3){
+  for(n in c(3)){
+    for(m in c(30)){
+      for(l in c(15)){
+        for(k in c(100)){
+          for(i in 1:5){
             
             ker = n
             poc_ker = m
@@ -324,7 +333,7 @@ for(o in 2){
             velic = o
             
             mlp <- udelej_nn()
-            nn_init_nn(mlp,poc_ker,c(poc_ker,poc_ker,1))
+            nn_init_nn(mlp,(poc_ker*o),c((poc_ker*o),(poc_ker*o),1))
             nn_set_vstup_rady(mlp, povodi[[i]]$Q[1:(roky_cal*365)],
                               povodi[[i]]$Q[(roky_cal*365+1):length(povodi[[i]]$Q)], 
                               povodi[[i]]$R[1:(roky_cal*365)],
@@ -341,8 +350,8 @@ for(o in 2){
             # Vytvoření datového rámce pro ggplot
             df_plot <- data.frame(
               Datum = povodi[[i]]$Datum[(roky_cal * 365 + 1 + ker):length(povodi[[i]]$Datum)],
-              Q_měřené = povodi[[i]]$Q[(roky_cal * 365 + 1 + ker):length(povodi[[i]]$Q)]*(minmax[i,2]-minmax[i,1])+minmax[i,1],
-              Q_modelované = vystupy*(minmax[i,2]-minmax[i,1])+minmax[i,1]
+              Q_měřené = povodi[[i]]$Q[(roky_cal * 365 + 1 + ker):length(povodi[[i]]$Q)]*minmax[i,2]+minmax[i,1],
+              Q_modelované = vystupy*minmax[i,2]+minmax[i,1]
             )
             
             # Vytvoření ggplot objektu
@@ -396,7 +405,9 @@ for(o in 2){
             saveRDS(vysl,"D:/pokusydip/vysl.rds")
             saveRDS(vysl_cr,"D:/pokusydip/vysl_cr.rds")
           }}}}}}}
-
+vysl <- readRDS("D:/pokusydip/nevim/vysl.rds")
+vyslbigsur <- vysl[vysl$povodi=="andreas",]
+vyslbigsur[vyslbigsur$pi==max(vyslbigsur$pi,na.rm=TRUE),]
 #########################################################################################x
 #########################       CNN ON FLY          #####################################
 #########################################################################################
@@ -414,11 +425,11 @@ for(o in 2){
     Rcamel <- Rcamel[!(Rcamel$V2 == 2 & Rcamel$V3 == 29), ]  
     cur_pov <- data.frame(Datum = as.Date(paste(Rcamel$V1,Rcamel$V2,Rcamel$V3, sep = "-")),
                           Q = (Qcamel$V5 * 0.0283168466), R = Rcamel$V6, Tmax = Rcamel$V9)
-    minmax[i,1] = min(cur_pov$Q)
-    minmax[i,2] = max(cur_pov$Q)
-    cur_pov$Q <- (cur_pov$Q - min(cur_pov$Q))/(max(cur_pov$Q)-min(cur_pov$Q))
-    cur_pov$R <- (cur_pov$R - min(cur_pov$R))/(max(cur_pov$R)-min(cur_pov$R))
-    cur_pov$Tmax <- (cur_pov$Tmax - min(cur_pov$Tmax))/(max(cur_pov$Tmax)-min(cur_pov$Tmax))
+    minmax[i,1] = mean(cur_pov$Q)
+    minmax[i,2] = sd(cur_pov$Q)
+    cur_pov$Q <- (cur_pov$Q - mean(cur_pov$Q))/sd(cur_pov$Q)
+    cur_pov$R <- (cur_pov$R - mean(cur_pov$R))/sd(cur_pov$R)
+    cur_pov$Tmax <- (cur_pov$Tmax - mean(cur_pov$Tmax))/sd(cur_pov$Tmax)
     povodi[[i]] <- cur_pov
     rm(cur_pov,Qcamel,Rcamel)
   }
@@ -486,12 +497,14 @@ output_folder <- "D:/pokusydip/"
 x = 1
 vysl = data.frame()
 vysl_cr = list()
+for(o in 2:3){
 for(n in c(2,3,5)){
 for(m in c(3,5,7)){
-for(l in c(10,30,50)){
-for(k in c(20)){           ### PRO 3.pov 10
-for(j in c(200,500)){
-for(i in 5){
+for(l in c(15,30)){
+for(k in c(15)){
+for(j in c(100)){
+for(i in 1:5){
+  velic = o
   row_ker = n
   col_ker = m
   poc_ker = l
@@ -499,7 +512,7 @@ for(i in 5){
   iter = j
   
   mlp <- udelej_nn()
-  nn_init_nn(mlp,poc_ker,c(poc_ker,poc_ker,1))
+  nn_init_nn(mlp,(poc_ker*o),c((poc_ker*o),(poc_ker*o),1))
   nn_set_vstup_rady(mlp, povodi[[i]]$Q[1:(roky_cal*365)],
                     povodi[[i]]$Q[(roky_cal*365+1):length(povodi[[i]]$Q)], 
                     povodi[[i]]$R[1:(roky_cal*365)],
@@ -508,26 +521,26 @@ for(i in 5){
                     povodi[[i]]$Tmax[(roky_cal*365+1):length(povodi[[i]]$Tmax)]
   )
   nn_set_chtenejout(mlp,povodi[[i]]$Q[((row_ker-1)*365+col_ker+1):(365*roky_cal+col_ker)])
-  nn_cnn_onfly_cal(mlp,row_ker,col_ker,poc_ker,iter)
-  nn_cnn_onfly_val(mlp)
+  nn_cnn_onfly_cal(mlp,row_ker,col_ker,poc_ker,iter,o)
+  nn_cnn_onfly_val(mlp,o)
   vystupy <- nn_get_vystupy(mlp)
   
   # Vytvoření datového rámce pro ggplot
   df_plot <- data.frame(
     Datum = povodi[[i]]$Datum[((roky_cal+row_ker-1)*365+1):length(povodi[[i]]$Datum)],
     Q_měřené = c(povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1+col_ker):length(povodi[[i]]$Q)],
-                 povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1):((roky_cal+row_ker-1)*365+col_ker)])*(minmax[i,2]-minmax[i,1])+minmax[i,1],
-    Q_modelované = vystupy*(minmax[i,2]-minmax[i,1])+minmax[i,1]
+                 povodi[[i]]$Q[((roky_cal+row_ker-1)*365+1):((roky_cal+row_ker-1)*365+col_ker)])*minmax[i,2]+minmax[i,1],
+    Q_modelované = vystupy*minmax[i,2]+minmax[i,1]
   )
   
   # Vytvoření ggplot objektu
   plot <- ggplot(df_plot, aes(x = Datum)) +
     geom_line(aes(y = Q_měřené, color = "Měřené"), linewidth = 0.6) +
-    geom_line(aes(y = Q_modelované, color = "Model"), linewidth = 0.45) +
+    geom_line(aes(y = Q_modelované, color = "Model"), linewidth = 0.45, linetype = "dashed") +
     scale_color_manual(values = c("Měřené" = "black", "Model" = "red")) +
     labs(
       title = paste0("povodi=", i, " radky=", row_ker, " sloupce=", col_ker, 
-                     " poc=", poc_ker, " roky cal=", roky_cal, " iter=", iter),
+                     " poc=", poc_ker, " roky cal=", roky_cal, " iter=", iter, " velic=", velic),
       subtitle = paste0(
         "mae=", round(mae(df_plot$Q_modelované, df_plot$Q_měřené),3), 
         "    rmse=", round(rmse(df_plot$Q_modelované, df_plot$Q_měřené),3), 
@@ -545,7 +558,7 @@ for(i in 5){
       plot.subtitle = element_text(size = 10)
     )
   
-  cur_id = paste0(i,"_",row_ker,"_",col_ker,"_",poc_ker,"_",roky_cal,"_",iter,"_o")
+  cur_id = paste0(i,"_",row_ker,"_",col_ker,"_",poc_ker,"_",roky_cal,"_",iter,"_",velic,"_2D")
   # Uložení grafu do souboru
   file_path <- file.path(output_folder, paste0(cur_id, ".png"))
   ggsave(file_path, plot = plot, width = 8, height = 6, dpi = 300, bg = "white")
@@ -557,18 +570,20 @@ for(i in 5){
   vysl[x,4] = poc_ker
   vysl[x,5] = roky_cal
   vysl[x,6] = iter
-  vysl[x,7] = round(mae(df_plot$Q_modelované,df_plot$Q_měřené),3)
-  vysl[x,8] = round(rmse(df_plot$Q_modelované,df_plot$Q_měřené),3)
-  vysl[x,9] = round(nse(df_plot$Q_modelované,df_plot$Q_měřené),3)
-  vysl[x,10] = round(pi(df_plot$Q_modelované,df_plot$Q_měřené),3)
-  vysl[x,11] = x
-  vysl[x,12] = cur_id
+  vysl[x,7] = velic
+  vysl[x,8] = round(mae(df_plot$Q_modelované,df_plot$Q_měřené),3)
+  vysl[x,9] = round(rmse(df_plot$Q_modelované,df_plot$Q_měřené),3)
+  vysl[x,10] = round(nse(df_plot$Q_modelované,df_plot$Q_měřené),3)
+  vysl[x,11] = round(pi(df_plot$Q_modelované,df_plot$Q_měřené),3)
+  vysl[x,12] = x
+  vysl[x,13] = cur_id
   vysl_cr[[x]] <- df_plot
   x= x+1
-}}}}}}
-names(vysl) = c("povodi","row_ker","col_ker","poc","roky_cal","iter","mae","rmse","nse","pi","x","id")
-saveRDS(vysl,"D:/pokusydip/vysl.rds")
-saveRDS(vysl_cr,"D:/pokusydip/vysl_cr.rds")
+  names(vysl) = c("povodi","row_ker","col_ker","poc","roky_cal","iter","velic","mae","rmse","nse","pi","x","id")
+  saveRDS(vysl,"D:/pokusydip/vysl.rds")
+  saveRDS(vysl_cr,"D:/pokusydip/vysl_cr.rds")
+}}}}}}}
+
 vysl[vysl$pi>0,]
 
 library(xtable)
@@ -776,11 +791,11 @@ vysl[vysl$pi == max(vysl$pi),]
     Rcamel <- Rcamel[!(Rcamel$V2 == 2 & Rcamel$V3 == 29), ]  
     cur_pov <- data.frame(Datum = as.Date(paste(Rcamel$V1,Rcamel$V2,Rcamel$V3, sep = "-")),
                           Q = (Qcamel$V5 * 0.0283168466), R = Rcamel$V6, Tmax = Rcamel$V9)
-    minmax[i,1] = min(cur_pov$Q)
-    minmax[i,2] = max(cur_pov$Q)
-    cur_pov$Q <- (cur_pov$Q - min(cur_pov$Q))/(max(cur_pov$Q)-min(cur_pov$Q))
-    cur_pov$R <- (cur_pov$R - min(cur_pov$R))/(max(cur_pov$R)-min(cur_pov$R))
-    cur_pov$Tmax <- (cur_pov$Tmax - min(cur_pov$Tmax))/(max(cur_pov$Tmax)-min(cur_pov$Tmax))
+    minmax[i,1] = mean(cur_pov$Q)
+    minmax[i,2] = sd(cur_pov$Q)
+    cur_pov$Q <- (cur_pov$Q - mean(cur_pov$Q))/sd(cur_pov$Q)
+    cur_pov$R <- (cur_pov$R - mean(cur_pov$R))/sd(cur_pov$R)
+    cur_pov$Tmax <- (cur_pov$Tmax - mean(cur_pov$Tmax))/sd(cur_pov$Tmax)
     povodi[[i]] <- cur_pov
     rm(cur_pov,Qcamel,Rcamel)
   }
@@ -847,13 +862,15 @@ output_folder <- "D:/pokusydip/"
 x = 1
 vysl = data.frame()
 vysl_cr = list()
-for(k in 4800){
+for(l in 3){
+for(k in 6000){
 for(j in c(250)){
 for(i in 3){
   iter = j
+  velic = l
   
   mlp <- udelej_nn()
-  nn_init_nn(mlp,150,c(150,150,6))
+  nn_init_nn(mlp,(50*l),c((50*l),(50*l),6))
   nn_set_vstup_rady(mlp, povodi[[i]]$Q[1:k],
                     povodi[[i]]$Q[(k+1):12000], 
                     povodi[[i]]$R[1:k],
@@ -861,24 +878,24 @@ for(i in 3){
                     povodi[[i]]$Tmax[1:k],
                     povodi[[i]]$Tmax[(k+1):12000]
   )
-  nn_cnn_full_cal(mlp,iter)
-  nn_cnn_full_val(mlp)
+  nn_cnn_full_cal(mlp,iter,velic)
+  nn_cnn_full_val(mlp,velic)
   vystupy <- nn_get_vystupy(mlp)
 
   # Vytvoření datového rámce pro ggplot
   df_plot <- data.frame(
     Datum = povodi[[i]]$Datum[(k+43):12006],
-    Q_měřené = povodi[[i]]$Q[(k+43):12006]*(minmax[i,2]-minmax[i,1])+minmax[i,1],
-    Q_modelované = vystupy*(minmax[i,2]-minmax[i,1])+minmax[i,1]
+    Q_měřené = povodi[[i]]$Q[(k+43):12006]*minmax[i,2]+minmax[i,1],
+    Q_modelované = vystupy*minmax[i,2]+minmax[i,1]
   )
   
   # Vytvoření ggplot objektu
   plot <- ggplot(df_plot, aes(x = Datum)) +
     geom_line(aes(y = Q_měřené, color = "Měřené"), linewidth = 0.6) +
-    geom_line(aes(y = Q_modelované, color = "Model"), linewidth = 0.45) +
+    geom_line(aes(y = Q_modelované, color = "Model"), linewidth = 0.45, linetype = "dashed") +
     scale_color_manual(values = c("Měřené" = "black", "Model" = "red")) +
     labs(
-      title = paste0("povodi=", i, " iter=", iter),
+      title = paste0("povodi=", i, " iter=", iter, " velic=", velic),
       subtitle = paste0(
         "mae=", round(mae(df_plot$Q_modelované, df_plot$Q_měřené),3), 
         "    rmse=", round(rmse(df_plot$Q_modelované, df_plot$Q_měřené),3), 
@@ -896,7 +913,7 @@ for(i in 3){
       plot.subtitle = element_text(size = 10)
     )
   
-  cur_id = paste0(i,"_",iter,"_f")
+  cur_id = paste0(i,"_",iter,"_",velic,"_f")
   # Uložení grafu do souboru
   file_path <- file.path(output_folder, paste0(cur_id, ".png"))
   ggsave(file_path, plot = plot, width = 8, height = 6, dpi = 300, bg = "white")
@@ -904,18 +921,20 @@ for(i in 3){
   print(x)
   vysl[x,1] = i
   vysl[x,2] = iter
-  vysl[x,3] = round(mae(df_plot$Q_modelované,df_plot$Q_měřené),3)
-  vysl[x,4] = round(rmse(df_plot$Q_modelované,df_plot$Q_měřené),3)
-  vysl[x,5] = round(nse(df_plot$Q_modelované,df_plot$Q_měřené),3)
-  vysl[x,6] = round(pi(df_plot$Q_modelované,df_plot$Q_měřené),3)
-  vysl[x,7] = x
-  vysl[x,8] = cur_id
+  vysl[x,3] = velic
+  vysl[x,4] = round(mae(df_plot$Q_modelované,df_plot$Q_měřené),3)
+  vysl[x,5] = round(rmse(df_plot$Q_modelované,df_plot$Q_měřené),3)
+  vysl[x,6] = round(nse(df_plot$Q_modelované,df_plot$Q_měřené),3)
+  vysl[x,7] = round(pi(df_plot$Q_modelované,df_plot$Q_měřené),3)
+  vysl[x,8] = x
+  vysl[x,9] = cur_id
   vysl_cr[[x]] <- df_plot
   x= x+1
-}}}
-names(vysl) = c("povodi","iter","mae","rmse","nse","pi","x","id")
-saveRDS(vysl,"D:/pokusydip/vysl.rds")
-saveRDS(vysl_cr,"D:/pokusydip/vysl_cr.rds")
+  names(vysl) = c("povodi","iter","velic","mae","rmse","nse","pi","x","id")
+  saveRDS(vysl,"D:/pokusydip/vysl.rds")
+  saveRDS(vysl_cr,"D:/pokusydip/vysl_cr.rds")
+  }}}}
+
 
 tabneco <- readRDS("D:/pokusydip/vysl.rds")
 tabneco <- tabneco[tabneco$roky_cal == 20,]
@@ -1018,9 +1037,9 @@ round(pi(salmoncr[[5]]$Q_modelované, salmoncr[[5]]$Q_měřené),3)
 round(nse(salmoncr[[5]]$Q_modelované, salmoncr[[5]]$Q_měřené),3)
 
 
-plot <- ggplot(salmoncr[[3]][1780:1950,], aes(x = Datum)) +
-  geom_line(aes(y = salmoncr[[3]]$Q_měřené[1780:1950], color = "Měřené"), linewidth = 0.6) +
-  geom_line(aes(y = salmoncr[[3]]$Q_modelované[1780:1950], color = "Model"), linewidth = 0.45, linetype = "dashed")+
+plot <- ggplot(vysl_cr[[1]][2000:2100,], aes(x = Datum)) +
+  geom_line(aes(y = vysl_cr[[1]]$Q_měřené[2000:2100], color = "Měřené"), linewidth = 0.6) +
+  geom_line(aes(y = vysl_cr[[1]]$Q_modelované[2000:2100], color = "Model"), linewidth = 0.45, linetype = "dashed")+
   scale_color_manual(values = c("Měřené" = "black", "Model" = "red")) +
   labs(
     x = NULL,
