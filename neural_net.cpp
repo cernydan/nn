@@ -1115,8 +1115,8 @@ void NN::cnnonfly_val(int velic){
 }
 
 void NN::cnn_full_cal(int iter, int velic){
+alfa = 0.0001;
     if(velic == 2){
-    //alfa = 0.01;
     kernely_full_1_Q.resize(10,3,3);
     kernely_full_1_Q.rand_vypln(0.0,0.1);
     kernely_full_2_Q.resize(5,2,2);
@@ -1402,7 +1402,6 @@ for(int ite = 0;ite<iter;++ite){
 }
 }
 }else if(velic == 3){
-    //alfa = 0.01;
     kernely_full_1_Q.resize(10,3,3);
     kernely_full_1_Q.rand_vypln(0.0,0.1);
     kernely_full_2_Q.resize(5,2,2);
@@ -1801,7 +1800,7 @@ if(velic == 2){
         std::cout << "Delka Q_val_vstup musi byt vetsi nez 36 a byt delitelna 6";
         exit(0);
     }
-
+    vystupy.clear();
     ////////////////////////////////KONVOLUCE
     Tenzor<double> vrstva0_Q;
     Tenzor<double> vrstva1_Q;
@@ -1818,7 +1817,6 @@ if(velic == 2){
     std::vector<double> current_kus_R;
 
     std::vector<double> vystzkonv;
-    vystupy.clear();
 
     for (int kroky = 0; kroky < ((Q_val_vstup.size()-36)/6);kroky++){
         vrstva0_Q.resize(0,0,0);
@@ -1827,7 +1825,7 @@ if(velic == 2){
         vrstva_final_Q.resize(0,0,0);
 
         for(int kus = 0; kus < 36; kus++){
-            current_kus_Q.push_back(Q_val_vstup[kroky + kus]);
+            current_kus_Q.push_back(Q_val_vstup[kroky * 6 + kus]);
         }
 
         dataprocnn_Q = udelej_radky(6,current_kus_Q);
@@ -1863,7 +1861,7 @@ if(velic == 2){
         vrstva_final_R.resize(0,0,0);
 
         for(int kus = 0; kus < 36; kus++){
-            current_kus_R.push_back(R_val_vstup[kroky + kus]);
+            current_kus_R.push_back(R_val_vstup[kroky * 6 + kus]);
         }
 
         dataprocnn_R = udelej_radky(6,current_kus_R);
@@ -1893,8 +1891,6 @@ if(velic == 2){
         }
 
     ///////////////////////////MLP
-
-    vystupy.clear();
     vystzkonv.clear();
 
     for(int i = 0;i<vrstva_final_Q.getDepth();++i){
@@ -1923,7 +1919,9 @@ if(velic == 2){
                     pom_vystup.push_back( sit[i][j].o);
                 }
             }
-            vystupy = pom_vystup;
+            for (int i = 0; i<pom_vystup.size();i++){  
+                vystupy.push_back(pom_vystup[i]);
+            }
     }
 }else if(velic == 3){ 
     if (Q_val_vstup.size() < 36 || Q_val_vstup.size() % 6 != 0) {
@@ -1954,7 +1952,6 @@ if(velic == 2){
     std::vector<double> current_kus_T;
 
     std::vector<double> vystzkonv;
-    vystupy.clear();
 
     for (int kroky = 0; kroky < ((Q_val_vstup.size()-36)/6);kroky++){
         vrstva0_Q.resize(0,0,0);
@@ -1963,7 +1960,7 @@ if(velic == 2){
         vrstva_final_Q.resize(0,0,0);
 
         for(int kus = 0; kus < 36; kus++){
-            current_kus_Q.push_back(Q_val_vstup[kroky + kus]);
+            current_kus_Q.push_back(Q_val_vstup[kroky * 6 + kus]);
         }
 
         dataprocnn_Q = udelej_radky(6,current_kus_Q);
@@ -1999,7 +1996,7 @@ if(velic == 2){
         vrstva_final_R.resize(0,0,0);
 
         for(int kus = 0; kus < 36; kus++){
-            current_kus_R.push_back(R_val_vstup[kroky + kus]);
+            current_kus_R.push_back(R_val_vstup[kroky * 6 + kus]);
         }
 
         dataprocnn_R = udelej_radky(6,current_kus_R);
@@ -2034,7 +2031,7 @@ if(velic == 2){
         vrstva_final_T.resize(0,0,0);
 
         for(int kus = 0; kus < 36; kus++){
-            current_kus_T.push_back(T_val_vstup[kroky + kus]);
+            current_kus_T.push_back(T_val_vstup[kroky * 6 + kus]);
         }
 
         dataprocnn_T = udelej_radky(6,current_kus_T);
@@ -2064,8 +2061,6 @@ if(velic == 2){
         }
 
     ///////////////////////////MLP
-
-    vystupy.clear();
     vystzkonv.clear();
 
     for(int i = 0;i<vrstva_final_Q.getDepth();++i){
@@ -2098,7 +2093,9 @@ if(velic == 2){
                     pom_vystup.push_back( sit[i][j].o);
                 }
             }
-            vystupy = pom_vystup;
+            for (int i = 0; i<pom_vystup.size();i++){  
+                vystupy.push_back(pom_vystup[i]);
+            }
     }
 }
 }

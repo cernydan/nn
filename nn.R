@@ -406,8 +406,8 @@ for(o in 3){
             saveRDS(vysl_cr,"D:/pokusydip/vysl_cr.rds")
           }}}}}}}
 vysl <- readRDS("D:/pokusydip/nevim/vysl.rds")
-vyslbigsur <- vysl[vysl$povodi=="andreas",]
-vyslbigsur[vyslbigsur$pi==max(vyslbigsur$pi,na.rm=TRUE),]
+vyslvyber <- vysl[vysl$povodi=="arroyo"&vysl$velic==3,]
+vyslvyber[tail(order(vyslvyber$pi),10),]
 #########################################################################################x
 #########################       CNN ON FLY          #####################################
 #########################################################################################
@@ -497,13 +497,20 @@ output_folder <- "D:/pokusydip/"
 x = 1
 vysl = data.frame()
 vysl_cr = list()
-for(o in 2:3){
-for(n in c(2,3,5)){
-for(m in c(3,5,7)){
-for(l in c(15,30)){
+for(pokus in 1:50){
+for(o in 2){
+for(n in c(2)){
+for(m in c(3)){
+for(l in c(30)){
 for(k in c(15)){
-for(j in c(100)){
+for(j in c(200)){
 for(i in 1:5){
+  if(i ==1){n = 3 ;m=3 ;l=10; o=2}
+  if(i ==2){n = 2;m=3;l=10;o=2}
+  if(i ==3){n = 2;m=3;l=30;o=3}
+  if(i ==4){n = 2;m=3;l=30;o=3}
+  if(i ==5){n = 2;m=5;l=10;o=3}
+  
   velic = o
   row_ker = n
   col_ker = m
@@ -558,7 +565,7 @@ for(i in 1:5){
       plot.subtitle = element_text(size = 10)
     )
   
-  cur_id = paste0(i,"_",row_ker,"_",col_ker,"_",poc_ker,"_",roky_cal,"_",iter,"_",velic,"_2D")
+  cur_id = paste0(i,"_",row_ker,"_",col_ker,"_",poc_ker,"_",roky_cal,"_",iter,"_",velic,"_2D","___",pokus)
   # Uložení grafu do souboru
   file_path <- file.path(output_folder, paste0(cur_id, ".png"))
   ggsave(file_path, plot = plot, width = 8, height = 6, dpi = 300, bg = "white")
@@ -582,9 +589,15 @@ for(i in 1:5){
   names(vysl) = c("povodi","row_ker","col_ker","poc","roky_cal","iter","velic","mae","rmse","nse","pi","x","id")
   saveRDS(vysl,"D:/pokusydip/vysl.rds")
   saveRDS(vysl_cr,"D:/pokusydip/vysl_cr.rds")
-}}}}}}}
+}}}}}}}}
 
 vysl[vysl$pi>0,]
+
+
+vysl <- 
+vyslvyber <- vysl[vysl$povodi == "andreas"& vysl$velic == 3,]
+vyslvyber[vyslvyber$pi == max(vyslvyber$pi),]
+vyslvyber[tail(order(vyslvyber$pi),10),]
 
 library(xtable)
 
@@ -862,10 +875,11 @@ output_folder <- "D:/pokusydip/"
 x = 1
 vysl = data.frame()
 vysl_cr = list()
-for(l in 3){
-for(k in 6000){
-for(j in c(250)){
-for(i in 3){
+for(pokus in 1:50){
+for(l in 2:3){
+for(k in 1200){
+for(j in c(100)){
+for(i in 1:5){
   iter = j
   velic = l
   
@@ -913,7 +927,7 @@ for(i in 3){
       plot.subtitle = element_text(size = 10)
     )
   
-  cur_id = paste0(i,"_",iter,"_",velic,"_f")
+  cur_id = paste0(i,"_",iter,"_",velic,"_f","___",pokus)
   # Uložení grafu do souboru
   file_path <- file.path(output_folder, paste0(cur_id, ".png"))
   ggsave(file_path, plot = plot, width = 8, height = 6, dpi = 300, bg = "white")
@@ -933,7 +947,7 @@ for(i in 3){
   names(vysl) = c("povodi","iter","velic","mae","rmse","nse","pi","x","id")
   saveRDS(vysl,"D:/pokusydip/vysl.rds")
   saveRDS(vysl_cr,"D:/pokusydip/vysl_cr.rds")
-  }}}}
+  }}}}}
 
 
 tabneco <- readRDS("D:/pokusydip/vysl.rds")
@@ -995,18 +1009,18 @@ library(ggplot2)
 
 
 salmonvysl <- readRDS("D:/pokusydip/1D_velic1_pov3/vysl.rds")
-salmoncr <- readRDS("D:/pokusydip/1D_velic1_pov3/vysl_cr.rds")
+salmoncr <- vysl_cr
 
-salmonvysl[salmonvysl$id=="3_1_3_30_10_500",]
+salmonvysl[salmonvysl$id=="4_3_3_30_15_100___1",]
 salmoncr[[]]
 
-round(pi(salmoncr[[9]]$Q_modelované[2:length(salmoncr[[9]]$Q_modelované)], salmoncr[[9]]$Q_měřené[1:(length(salmoncr[[9]]$Q_modelované)-1)]),3)
-round(nse(salmoncr[[9]]$Q_modelované, salmoncr[[9]]$Q_měřené),3)
+round(pi(salmoncr[[34]]$Q_modelované[1:length(salmoncr[[34]]$Q_modelované)], salmoncr[[34]]$Q_měřené[1:length(salmoncr[[34]]$Q_modelované)]),3)
+round(nse(salmoncr[[34]]$Q_modelované, salmoncr[[34]]$Q_měřené),3)
 
 
-plot <- ggplot(salmoncr[[9]][7590:7600,], aes(x = Datum)) +
-  geom_line(aes(y = salmoncr[[9]]$Q_měřené[7590:7600], color = "Měřené"), linewidth = 0.6) +
-  geom_line(aes(y = salmoncr[[9]]$Q_modelované[7590:7600], color = "Model"), linewidth = 0.45, linetype = "dashed")+
+plot <- ggplot(salmoncr[[34]][1100:1150,], aes(x = Datum)) +
+  geom_line(aes(y = salmoncr[[34]]$Q_měřené[1100:1150], color = "Měřené"), linewidth = 0.6) +
+  geom_line(aes(y = salmoncr[[34]]$Q_modelované[1100:1150], color = "Model"), linewidth = 0.45, linetype = "dashed")+
   scale_color_manual(values = c("Měřené" = "black", "Model" = "red")) +
   labs(
     x = NULL,
@@ -1021,14 +1035,14 @@ plot <- ggplot(salmoncr[[9]][7590:7600,], aes(x = Datum)) +
   )
 plot
 
-plot(salmoncr[[9]]$Q_měřené[7590:7599],type = "l")
-lines(salmoncr[[9]]$Q_modelované[7591:7600],col = "red")
+plot(salmoncr[[34]]$Q_měřené[2035:2045],type = "l")
+lines(salmoncr[[34]]$Q_modelované[2035:2045],col = "red")
 
 
 
 
-salmonvysl <- readRDS("D:/pokusydip/vysl.rds")
-salmoncr <- readRDS("D:/pokusydip/vysl_cr.rds")
+salmonvysl <- readRDS("D:/pokusydip/nevim/vysl.rds")
+salmoncr <- readRDS("D:/pokusydip/nevim/vysl_cr.rds")
 
 salmonvysl[salmonvysl$id=="3_2_3_10_10_200___1",]
 salmoncr[[]]
