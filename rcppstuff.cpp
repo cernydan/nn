@@ -183,3 +183,13 @@ void nn_cnn_full_cal(Rcpp::XPtr<NN> nn,int iters, int velic){
 void nn_cnn_full_val(Rcpp::XPtr<NN> nn, int velic){
     nn->cnn_full_val(velic);
 }
+
+//[[Rcpp::export]]
+void nn_cnn_1dreal_cal(Rcpp::XPtr<NN> nn,int iter, int velic){
+    nn->cnn1Dreal_cal(iter, velic);
+}
+
+//[[Rcpp::export]]
+void nn_cnn_1dreal_val(Rcpp::XPtr<NN> nn, int velic){
+    nn->cnn1Dreal_val(velic);
+}

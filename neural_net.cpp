@@ -1163,7 +1163,7 @@ alfa = 0.0001;
 
 for(int ite = 0;ite<iter;++ite){
     std::cout<<ite;
-    for (int kroky = 0; kroky < (Q_kal_vstup.size() - 42); kroky++){
+    for (int kroky = 0; kroky < (Q_kal_vstup.size() - 36); kroky++){
         vrstva0_Q.resize(0,0,0);
         vrstva1_Q.resize(0,0,0);
         vrstva2_Q.resize(0,0,0);
@@ -1173,9 +1173,8 @@ for(int ite = 0;ite<iter;++ite){
             current_kus_Q.push_back(Q_kal_vstup[kroky + kus]);
         }
         chtenejout.clear();
-        for(int cht = 0;cht< 6;cht++){
-            chtenejout.push_back(Q_kal_vstup[36+cht+kroky]);
-        }
+        chtenejout.push_back(Q_kal_vstup[36+kroky]);
+
 
         dataprocnn_Q = udelej_radky(6,current_kus_Q);
         current_kus_Q.clear();
@@ -1466,7 +1465,7 @@ for(int ite = 0;ite<iter;++ite){
 
 for(int ite = 0;ite<iter;++ite){
     std::cout<<ite;
-    for (int kroky = 0; kroky < (Q_kal_vstup.size() - 42); kroky++){
+    for (int kroky = 0; kroky < (Q_kal_vstup.size() - 36); kroky++){
         vrstva0_Q.resize(0,0,0);
         vrstva1_Q.resize(0,0,0);
         vrstva2_Q.resize(0,0,0);
@@ -1476,9 +1475,7 @@ for(int ite = 0;ite<iter;++ite){
             current_kus_Q.push_back(Q_kal_vstup[kroky + kus]);
         }
         chtenejout.clear();
-        for(int cht = 0;cht< 6;cht++){
-            chtenejout.push_back(Q_kal_vstup[36+cht+kroky]);
-        }
+        chtenejout.push_back(Q_kal_vstup[36+kroky]);
 
         dataprocnn_Q = udelej_radky(6,current_kus_Q);
         current_kus_Q.clear();
@@ -1795,12 +1792,12 @@ for(int ite = 0;ite<iter;++ite){
 }
 
 void NN::cnn_full_val(int velic){
+    vystupy.clear();
 if(velic == 2){ 
-    if (Q_val_vstup.size() < 36 || Q_val_vstup.size() % 6 != 0) {
-        std::cout << "Delka Q_val_vstup musi byt vetsi nez 36 a byt delitelna 6";
+    if (Q_val_vstup.size() < 36) {
+        std::cout << "Delka Q_val_vstup musi byt vetsi nez 36";
         exit(0);
     }
-    vystupy.clear();
     ////////////////////////////////KONVOLUCE
     Tenzor<double> vrstva0_Q;
     Tenzor<double> vrstva1_Q;
@@ -1818,14 +1815,14 @@ if(velic == 2){
 
     std::vector<double> vystzkonv;
 
-    for (int kroky = 0; kroky < ((Q_val_vstup.size()-36)/6);kroky++){
+    for (int kroky = 0; kroky < ((Q_val_vstup.size()-36));kroky++){
         vrstva0_Q.resize(0,0,0);
         vrstva1_Q.resize(0,0,0);
         vrstva2_Q.resize(0,0,0);
         vrstva_final_Q.resize(0,0,0);
 
         for(int kus = 0; kus < 36; kus++){
-            current_kus_Q.push_back(Q_val_vstup[kroky * 6 + kus]);
+            current_kus_Q.push_back(Q_val_vstup[kroky + kus]);
         }
 
         dataprocnn_Q = udelej_radky(6,current_kus_Q);
@@ -1861,7 +1858,7 @@ if(velic == 2){
         vrstva_final_R.resize(0,0,0);
 
         for(int kus = 0; kus < 36; kus++){
-            current_kus_R.push_back(R_val_vstup[kroky * 6 + kus]);
+            current_kus_R.push_back(R_val_vstup[kroky + kus]);
         }
 
         dataprocnn_R = udelej_radky(6,current_kus_R);
@@ -1924,8 +1921,8 @@ if(velic == 2){
             }
     }
 }else if(velic == 3){ 
-    if (Q_val_vstup.size() < 36 || Q_val_vstup.size() % 6 != 0) {
-        std::cout << "Delka Q_val_vstup musi byt vetsi nez 36 a byt delitelna 6";
+    if (Q_val_vstup.size() < 36) {
+        std::cout << "Delka Q_val_vstup musi byt vetsi nez 36";
         exit(0);
     }
 
@@ -1953,14 +1950,14 @@ if(velic == 2){
 
     std::vector<double> vystzkonv;
 
-    for (int kroky = 0; kroky < ((Q_val_vstup.size()-36)/6);kroky++){
+    for (int kroky = 0; kroky < (Q_val_vstup.size()-36);kroky++){
         vrstva0_Q.resize(0,0,0);
         vrstva1_Q.resize(0,0,0);
         vrstva2_Q.resize(0,0,0);
         vrstva_final_Q.resize(0,0,0);
 
         for(int kus = 0; kus < 36; kus++){
-            current_kus_Q.push_back(Q_val_vstup[kroky * 6 + kus]);
+            current_kus_Q.push_back(Q_val_vstup[kroky + kus]);
         }
 
         dataprocnn_Q = udelej_radky(6,current_kus_Q);
@@ -1996,7 +1993,7 @@ if(velic == 2){
         vrstva_final_R.resize(0,0,0);
 
         for(int kus = 0; kus < 36; kus++){
-            current_kus_R.push_back(R_val_vstup[kroky * 6 + kus]);
+            current_kus_R.push_back(R_val_vstup[kroky + kus]);
         }
 
         dataprocnn_R = udelej_radky(6,current_kus_R);
@@ -2031,7 +2028,7 @@ if(velic == 2){
         vrstva_final_T.resize(0,0,0);
 
         for(int kus = 0; kus < 36; kus++){
-            current_kus_T.push_back(T_val_vstup[kroky * 6 + kus]);
+            current_kus_T.push_back(T_val_vstup[kroky + kus]);
         }
 
         dataprocnn_T = udelej_radky(6,current_kus_T);
@@ -2664,4 +2661,808 @@ if(velic == 3){
             vystupy.push_back(pom_vystup[0]);    
             }   
 }
+}
+
+void NN::cnn1Dreal_cal(int iter, int velic){
+    alfa = 0.0001;
+    kernely_1Dreal_1.clear();
+    kernely_1Dreal_2.clear();
+    kernely_1Dreal_3.clear();
+
+    bias_1Dreal_1.clear();
+    bias_1Dreal_2.clear();
+    bias_1Dreal_3.clear();
+
+    std::vector<double>init;
+    for (int i = 0; i<5;i++){
+        for(int j = 0; j<15;j++){
+            init.push_back(random(0.0,0.1));
+        }
+        kernely_1Dreal_1.push_back(init);
+        init.clear();
+
+        bias_1Dreal_1.push_back(0.0);
+    }
+
+    for (int i = 0; i<2;i++){
+        for(int j = 0; j<10;j++){
+            init.push_back(random(0.0,0.1));
+        }
+        kernely_1Dreal_2.push_back(init);
+        init.clear();
+
+        for(int j = 0; j<7;j++){
+            init.push_back(random(0.0,0.1));
+        }
+        kernely_1Dreal_3.push_back(init);
+        init.clear();
+
+        bias_1Dreal_2.push_back(0.0);
+        bias_1Dreal_3.push_back(0.0);
+    }
+    std::vector<double> vystzkonv;
+    std::vector<std::vector<double>>vrstva1;
+    std::vector<std::vector<double>>vrstva2;
+    std::vector<std::vector<double>>delta_1_2;
+    std::vector<std::vector<double>>delta_2_3;
+    double deltazmlp; 
+    if(velic == 2){
+        if (Q_kal_vstup.size() != R_kal_vstup.size()) {
+            std::cout << "vstupni řady nejsou stejně dlouhý";
+            exit(0);
+        }
+    
+    //////////////////////////////////////////////////////////// KALIBRACE //////////////////////////////////////////////////////
+        for(int iters = 0; iters < iter; iters++){
+            for(int kroky = 0; kroky < (Q_kal_vstup.size() - 30); kroky++){
+                vystzkonv.clear();
+                vrstva1.clear();
+                vrstva2.clear();
+                delta_1_2.clear();
+                delta_2_3.clear();
+                chtenejout.clear();
+                chtenejout.push_back(Q_kal_vstup[kroky+30]);
+                for(int i = 0; i<5;i++){
+                    for(int j = 0; j<16;j++){
+                        double konvo = 0.0;
+                        for(int k = 0; k<15;k++){
+                            konvo += kernely_1Dreal_1[i][k] * Q_kal_vstup[kroky +j+k];
+                        }
+                        konvo+=bias_1Dreal_1[i];
+                        if(konvo<0.0){
+                            init.push_back(konvo * 0.01);
+                        }else{
+                            init.push_back(konvo * 0.01);
+                        }
+                    }
+                    vrstva1.push_back(init);
+                    init.clear();
+                }
+
+                for(int i = 0; i<5;i++){
+                    for(int j = 0; j<16;j++){
+                        double konvo = 0.0;
+                        for(int k = 0; k<15;k++){
+                            konvo += kernely_1Dreal_1[i][k] * R_kal_vstup[kroky +j+k];
+                        }
+                        konvo+=bias_1Dreal_1[i];
+                        if(konvo<0.0){
+                            init.push_back(konvo * 0.01);
+                        }else{
+                            init.push_back(konvo);
+                        }
+                    }
+                    vrstva1.push_back(init);
+                    init.clear();
+                }
+                
+
+                for(int i = 0; i<2;i++){
+                    for(int j = 0; j<10; j++){
+                        for(int k = 0;k<7;k++){
+                            double konvo = 0.0;
+                            for(int l = 0; l<10;l++){
+                                konvo+=kernely_1Dreal_2[i][l]*vrstva1[j][k+l];
+                            }
+                            konvo+=bias_1Dreal_2[i];
+                            if(konvo<0.0){
+                                init.push_back(konvo * 0.01);
+                            }else{
+                                init.push_back(konvo);
+                            }
+                        }
+                        vrstva2.push_back(init);
+                        init.clear();
+                    }
+                }
+
+                for(int i = 0; i<2;i++){
+                    for(int j = 0; j<20; j++){
+                            double konvo = 0.0;
+                            for(int l = 0; l<7;l++){
+                                konvo+=kernely_1Dreal_3[i][l]*vrstva2[j][l];
+                            }
+                            konvo+=bias_1Dreal_3[i];
+                            if(konvo<0.0){
+                                vystzkonv.push_back(konvo * 0.01);
+                            }else{
+                                vystzkonv.push_back(konvo);
+                            }
+                    }
+                }
+
+                //// MLP //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                pom_vystup.clear();
+                for (int i = 0; i < rozmery[0]; ++i) {
+                    sit[0][i].set_vstupy(vystzkonv);
+                    sit[0][i].vypocet();
+                    pom_vystup.push_back(sit[0][i].o);
+                }
+                
+                for (int i = 1; i < pocet_vrstev; ++i) {
+                    for (int j = 0; j < rozmery[i]; ++j) {
+                        sit[i][j].set_vstupy(pom_vystup);
+                        sit[i][j].vypocet();
+                    }
+                    pom_vystup.clear();
+                    for (int j = 0; j < rozmery[i]; ++j) {
+                        pom_vystup.push_back( sit[i][j].o);
+                    }
+                }
+
+//// MLP BACKPROP ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                sit[pocet_vrstev-1][rozmery[pocet_vrstev-1]-1].delta = pom_vystup[0] - chtenejout[0];
+
+        for (int i=0;i<rozmery[pocet_vrstev-2];++i){
+            sit[pocet_vrstev-2][i].delta = sit[pocet_vrstev-2][i].der_akt_fun(sit[pocet_vrstev-2][i].a)*(sit[pocet_vrstev-1][rozmery[pocet_vrstev-1]-1].vahy[i] * sit[pocet_vrstev-1][rozmery[pocet_vrstev-1]-1].delta);
+         }
+
+        for(int j = (pocet_vrstev-3); j>=0;--j){
+            for (int i=0;i<rozmery[j];++i){
+                 double skalsoucprv = 0.0;
+                for(int k = 0;k<rozmery[j+1];++k){
+                    skalsoucprv += sit[j+1][k].vahy[i] * sit[j+1][k].delta;
+                }
+            
+            sit[j][i].delta = sit[j][i].der_akt_fun(sit[j][i].a)*skalsoucprv;
+        }
+    }
+
+        for(int i = 0;i<pocet_vrstev;++i){
+        for(int j = 0;j<rozmery[i];++j){
+            for(int k = 0; k < sit[i][j].vahy.size();++k)
+                sit[i][j].vahy[k] = sit[i][j].vahy[k] - alfa * sit[i][j].delta * sit[i][j].vstupy[k];
+        }
+    }
+
+    ///////////////////////// CNN BACKPROP ////////////////////////////////////////////////////////////////////////////////////
+    for (int neur = 0;neur<rozmery[0];++neur){
+        deltazmlp = sit[0][neur].delta;
+
+        for(int i = 0; i<2;i++){
+            for(int j = 0; j<7;j++){
+                init.push_back(kernely_1Dreal_3[i][6-j] * deltazmlp);
+            }
+            delta_2_3.push_back(init);
+            init.clear();
+        }
+
+        std::vector<double>obracfiltr;
+        for(int i = 0; i<2;i++){
+            for(int j = 0; j<2;j++){
+                for(int k=0;k<10;k++){
+                    obracfiltr.push_back(kernely_1Dreal_2[i][9-k]);
+                }
+                for(int k=0;k<6;k++){
+                    obracfiltr.push_back(0.0);
+                    obracfiltr.insert(obracfiltr.begin(), 0.0);
+                }
+                for(int k = 0;k<16;k++){
+                    double konvo = 0.0;
+                    for(int l = 0;l<7;l++){
+                        konvo+=obracfiltr[k+l]*delta_2_3[j][l];
+                    }
+                    init.push_back(konvo);
+                }
+                delta_1_2.push_back(init);
+                obracfiltr.clear();
+                init.clear();
+            }
+        }
+
+        for(int i = 0; i<2;i++){
+            for(int j = 0; j<20;j++){
+                if(vystzkonv[i*20+j]<0.0){    
+                    for(int k = 0; k<7;k++){
+                        kernely_1Dreal_3[i][j] -= 0.01 * alfa * vrstva2[j][k]*deltazmlp;
+                    }
+                    bias_1Dreal_3[i]-=0.01 * alfa * deltazmlp;
+                }else{
+                    for(int k = 0; k<7;k++){
+                        kernely_1Dreal_3[i][j] -= alfa * vrstva2[j][k]*deltazmlp;
+                    }
+                    bias_1Dreal_3[i] -= alfa * deltazmlp;
+                }
+            }
+        }
+
+        for(int i = 0; i<2;i++){
+            for(int j = 0; j<2;j++){
+                for(int k = 0;k<10;k++){
+                    for(int m = 0;m<7;m++){
+                        for (int l = 0;l<10;l++){
+                            if(vrstva2[i*10+k][m]<0.0){
+                                kernely_1Dreal_2[i][l]-= 0.01 * alfa * vrstva1[k][l+m] * delta_2_3[j][m];
+                            }else{
+                                kernely_1Dreal_2[i][l]-= alfa * vrstva1[k][l+m] * delta_2_3[j][m];
+                            }
+                        }
+                        if(vrstva2[i*10+k][m]<0.0){
+                            bias_1Dreal_2[i] -= 0.01 * alfa * delta_2_3[j][m];
+                        }else{
+                            bias_1Dreal_2[i] -= alfa * delta_2_3[j][m];
+                        }
+                    }
+                }
+            }
+        }
+
+        for(int i = 0; i<5;i++){
+            for(int j = 0; j<4;j++){
+                    for(int m = 0;m<16;m++){
+                        for (int l = 0;l<15;l++){
+                            if(vrstva1[i][m]<0.0){
+                                kernely_1Dreal_1[i][l]-= 0.01 * alfa * Q_kal_vstup[kroky +l+m] * delta_1_2[j][m];
+                            }else{
+                                kernely_1Dreal_1[i][l]-= alfa * Q_kal_vstup[kroky +l+m] * delta_1_2[j][m];
+                            }
+                        }
+                        if(vrstva1[i][m]<0.0){
+                            bias_1Dreal_1[i] -= 0.01 * alfa * delta_1_2[j][m];
+                        }else{
+                            bias_1Dreal_1[i] -= alfa * delta_1_2[j][m];
+                        }
+                    }
+            
+            }
+        }
+
+        for(int i = 0; i<5;i++){
+            for(int j = 0; j<4;j++){
+                    for(int m = 0;m<16;m++){
+                        for (int l = 0;l<15;l++){
+                            if(vrstva1[5+i][m]<0.0){
+                                kernely_1Dreal_1[i][l]-= 0.01 * alfa * R_kal_vstup[kroky +l+m] * delta_1_2[j][m];
+                            }else{
+                                kernely_1Dreal_1[i][l]-= alfa * R_kal_vstup[kroky +l+m] * delta_1_2[j][m];
+                            }
+                        }
+                        if(vrstva1[i][m]<0.0){
+                            bias_1Dreal_1[i] -= 0.01 * alfa * delta_1_2[j][m];
+                        }else{
+                            bias_1Dreal_1[i] -= alfa * delta_1_2[j][m];
+                        }
+                    }
+            
+            }
+        }   
+            }
+
+        
+
+        }
+    }
+    } else if(velic == 3){
+        if (Q_kal_vstup.size() != R_kal_vstup.size() || Q_kal_vstup.size() != T_kal_vstup.size()) {
+            std::cout << "vstupni řady nejsou stejně dlouhý";
+            exit(0);
+        }
+    
+    //////////////////////////////////////////////////////////// KALIBRACE //////////////////////////////////////////////////////
+        for(int iters = 0; iters < iter; iters++){
+            for(int kroky = 0; kroky < (Q_kal_vstup.size() - 30); kroky++){
+                vystzkonv.clear();
+                vrstva1.clear();
+                vrstva2.clear();
+                delta_1_2.clear();
+                delta_2_3.clear();
+                chtenejout.clear();
+                chtenejout.push_back(Q_kal_vstup[kroky+30]);
+                for(int i = 0; i<5;i++){
+                    for(int j = 0; j<16;j++){
+                        double konvo = 0.0;
+                        for(int k = 0; k<15;k++){
+                            konvo += kernely_1Dreal_1[i][k] * Q_kal_vstup[kroky +j+k];
+                        }
+                        konvo+=bias_1Dreal_1[i];
+                        if(konvo<0.0){
+                            init.push_back(konvo * 0.01);
+                        }else{
+                            init.push_back(konvo);
+                        }
+                    }
+                    vrstva1.push_back(init);
+                    init.clear();
+                }
+
+                for(int i = 0; i<5;i++){
+                    for(int j = 0; j<16;j++){
+                        double konvo = 0.0;
+                        for(int k = 0; k<15;k++){
+                            konvo += kernely_1Dreal_1[i][k] * R_kal_vstup[kroky +j+k];
+                        }
+                        konvo+=bias_1Dreal_1[i];
+                        if(konvo<0.0){
+                            init.push_back(konvo * 0.01);
+                        }else{
+                            init.push_back(konvo);
+                        }
+                    }
+                    vrstva1.push_back(init);
+                    init.clear();
+                }
+
+                for(int i = 0; i<5;i++){
+                    for(int j = 0; j<16;j++){
+                        double konvo = 0.0;
+                        for(int k = 0; k<15;k++){
+                            konvo += kernely_1Dreal_1[i][k] * T_kal_vstup[kroky +j+k];
+                        }
+                        konvo+=bias_1Dreal_1[i];
+                        if(konvo<0.0){
+                            init.push_back(konvo * 0.01);
+                        }else{
+                            init.push_back(konvo);
+                        }
+                    }
+                    vrstva1.push_back(init);
+                    init.clear();
+                }
+
+                for(int i = 0; i<2;i++){
+                    for(int j = 0; j<15; j++){
+                        for(int k = 0;k<7;k++){
+                            double konvo = 0.0;
+                            for(int l = 0; l<10;l++){
+                                konvo+=kernely_1Dreal_2[i][l]*vrstva1[j][k+l];
+                            }
+                            konvo+=bias_1Dreal_2[i];
+                            if(konvo<0.0){
+                                init.push_back(konvo * 0.01);
+                            }else{
+                                init.push_back(konvo);
+                            }
+                        }
+                        vrstva2.push_back(init);
+                        init.clear();
+                    }
+                }
+
+                for(int i = 0; i<2;i++){
+                    for(int j = 0; j<30; j++){
+                            double konvo = 0.0;
+                            for(int l = 0; l<7;l++){
+                                konvo+=kernely_1Dreal_3[i][l]*vrstva2[j][l];
+                            }
+                            konvo+=bias_1Dreal_3[i];
+                            if(konvo<0.0){
+                                vystzkonv.push_back(konvo * 0.01);
+                            }else{
+                                vystzkonv.push_back(konvo);
+                            }
+                    }
+                }
+
+                //// MLP //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                pom_vystup.clear();
+                for (int i = 0; i < rozmery[0]; ++i) {
+                    sit[0][i].set_vstupy(vystzkonv);
+                    sit[0][i].vypocet();
+                    pom_vystup.push_back(sit[0][i].o);
+                }
+                
+                for (int i = 1; i < pocet_vrstev; ++i) {
+                    for (int j = 0; j < rozmery[i]; ++j) {
+                        sit[i][j].set_vstupy(pom_vystup);
+                        sit[i][j].vypocet();
+                    }
+                    pom_vystup.clear();
+                    for (int j = 0; j < rozmery[i]; ++j) {
+                        pom_vystup.push_back( sit[i][j].o);
+                    }
+                }
+
+//// MLP BACKPROP ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                sit[pocet_vrstev-1][rozmery[pocet_vrstev-1]-1].delta = pom_vystup[0] - chtenejout[0];
+
+        for (int i=0;i<rozmery[pocet_vrstev-2];++i){
+            sit[pocet_vrstev-2][i].delta = sit[pocet_vrstev-2][i].der_akt_fun(sit[pocet_vrstev-2][i].a)*(sit[pocet_vrstev-1][rozmery[pocet_vrstev-1]-1].vahy[i] * sit[pocet_vrstev-1][rozmery[pocet_vrstev-1]-1].delta);
+         }
+
+        for(int j = (pocet_vrstev-3); j>=0;--j){
+            for (int i=0;i<rozmery[j];++i){
+                 double skalsoucprv = 0.0;
+                for(int k = 0;k<rozmery[j+1];++k){
+                    skalsoucprv += sit[j+1][k].vahy[i] * sit[j+1][k].delta;
+                }
+            
+            sit[j][i].delta = sit[j][i].der_akt_fun(sit[j][i].a)*skalsoucprv;
+        }
+    }
+
+        for(int i = 0;i<pocet_vrstev;++i){
+        for(int j = 0;j<rozmery[i];++j){
+            for(int k = 0; k < sit[i][j].vahy.size();++k)
+                sit[i][j].vahy[k] = sit[i][j].vahy[k] - alfa * sit[i][j].delta * sit[i][j].vstupy[k];
+        }
+    }
+///////////////////////// CNN BACKPROP ////////////////////////////////////////////////////////////////////////////////////
+    for (int neur = 0;neur<rozmery[0];++neur){
+        deltazmlp = sit[0][neur].delta;
+
+        for(int i = 0; i<2;i++){
+            for(int j = 0; j<7;j++){
+                init.push_back(kernely_1Dreal_3[i][6-j] * deltazmlp);
+            }
+            delta_2_3.push_back(init);
+            init.clear();
+        }
+
+        std::vector<double>obracfiltr;
+        for(int i = 0; i<2;i++){
+            for(int j = 0; j<2;j++){
+                for(int k=0;k<10;k++){
+                    obracfiltr.push_back(kernely_1Dreal_2[i][9-k]);
+                }
+                for(int k=0;k<6;k++){
+                    obracfiltr.push_back(0.0);
+                    obracfiltr.insert(obracfiltr.begin(), 0.0);
+                }
+                for(int k = 0;k<16;k++){
+                    double konvo = 0.0;
+                    for(int l = 0;l<7;l++){
+                        konvo+=obracfiltr[k+l]*delta_2_3[j][l];
+                    }
+                    init.push_back(konvo);
+                }
+                delta_1_2.push_back(init);
+                obracfiltr.clear();
+                init.clear();
+            }
+        }
+
+        for(int i = 0; i<2;i++){
+            for(int j = 0; j<30;j++){
+                if(vystzkonv[i*30+j]<0.0){    
+                    for(int k = 0; k<7;k++){
+                        kernely_1Dreal_3[i][j] -= 0.01 * alfa * vrstva2[j][k]*deltazmlp;
+                    }
+                    bias_1Dreal_3[i]-=0.01 * alfa * deltazmlp;
+                }else{
+                    for(int k = 0; k<7;k++){
+                        kernely_1Dreal_3[i][j] -= alfa * vrstva2[j][k]*deltazmlp;
+                    }
+                    bias_1Dreal_3[i] -= alfa * deltazmlp;
+                }
+            }
+        }
+
+        for(int i = 0; i<2;i++){
+            for(int j = 0; j<2;j++){
+                for(int k = 0;k<15;k++){
+                    for(int m = 0;m<7;m++){
+                        for (int l = 0;l<10;l++){
+                            if(vrstva2[i*15+k][m]<0.0){
+                                kernely_1Dreal_2[i][l]-= 0.01 * alfa * vrstva1[k][l+m] * delta_2_3[j][m];
+                            }else{
+                                kernely_1Dreal_2[i][l]-= alfa * vrstva1[k][l+m] * delta_2_3[j][m];
+                            }
+                        }
+                        if(vrstva2[i*15+k][m]<0.0){
+                            bias_1Dreal_2[i] -= 0.01 * alfa * delta_2_3[j][m];
+                        }else{
+                            bias_1Dreal_2[i] -= alfa * delta_2_3[j][m];
+                        }
+                    }
+                }
+            }
+        }
+
+        for(int i = 0; i<5;i++){
+            for(int j = 0; j<4;j++){
+                    for(int m = 0;m<16;m++){
+                        for (int l = 0;l<15;l++){
+                            if(vrstva1[i][m]<0.0){
+                                kernely_1Dreal_1[i][l]-= 0.01 * alfa * Q_kal_vstup[kroky +l+m] * delta_1_2[j][m];
+                            }else{
+                                kernely_1Dreal_1[i][l]-= alfa * Q_kal_vstup[kroky +l+m] * delta_1_2[j][m];
+                            }
+                        }
+                        if(vrstva1[i][m]<0.0){
+                            bias_1Dreal_1[i] -= 0.01 * alfa * delta_1_2[j][m];
+                        }else{
+                            bias_1Dreal_1[i] -= alfa * delta_1_2[j][m];
+                        }
+                    }
+            
+            }
+        }
+
+        for(int i = 0; i<5;i++){
+            for(int j = 0; j<4;j++){
+                    for(int m = 0;m<16;m++){
+                        for (int l = 0;l<15;l++){
+                            if(vrstva1[5+i][m]<0.0){
+                                kernely_1Dreal_1[i][l]-= 0.01 * alfa * R_kal_vstup[kroky +l+m] * delta_1_2[j][m];
+                            }else{
+                                kernely_1Dreal_1[i][l]-= alfa * R_kal_vstup[kroky +l+m] * delta_1_2[j][m];
+                            }
+                        }
+                        if(vrstva1[i][m]<0.0){
+                            bias_1Dreal_1[i] -= 0.01 * alfa * delta_1_2[j][m];
+                        }else{
+                            bias_1Dreal_1[i] -= alfa * delta_1_2[j][m];
+                        }
+                    }
+            
+            }
+        }
+
+        for(int i = 0; i<5;i++){
+            for(int j = 0; j<4;j++){
+                    for(int m = 0;m<16;m++){
+                        for (int l = 0;l<15;l++){
+                            if(vrstva1[10+i][m]<0.0){
+                                kernely_1Dreal_1[i][l]-= 0.01 * alfa * T_kal_vstup[kroky +l+m] * delta_1_2[j][m];
+                            }else{
+                                kernely_1Dreal_1[i][l]-= alfa * T_kal_vstup[kroky +l+m] * delta_1_2[j][m];
+                            }
+                        }
+                        if(vrstva1[i][m]<0.0){
+                            bias_1Dreal_1[i] -= 0.01 * alfa * delta_1_2[j][m];
+                        }else{
+                            bias_1Dreal_1[i] -= alfa * delta_1_2[j][m];
+                        }
+                    }
+            
+            }
+        }
+
+
+                
+            }
+        }
+        }
+    }
+}
+void NN::cnn1Dreal_val(int velic){
+    vystupy.clear();
+    std::vector<double> vystzkonv;
+    std::vector<std::vector<double>>vrstva1;
+    std::vector<std::vector<double>>vrstva2; 
+    if(velic == 2){
+        if (Q_val_vstup.size() != R_val_vstup.size()) {
+            std::cout << "vstupni řady nejsou stejně dlouhý";
+            exit(0);
+        }
+    
+            for(int kroky = 0; kroky < (Q_val_vstup.size() - 30); kroky++){
+                vystzkonv.clear();
+                vrstva1.clear();
+                vrstva2.clear();
+
+                std::vector<double>mezivrst;
+                for(int i = 0; i<5;i++){
+                    for(int j = 0; j<16;j++){
+                        double konvo = 0.0;
+                        for(int k = 0; k<15;k++){
+                            konvo += kernely_1Dreal_1[i][k] * Q_val_vstup[kroky +j+k];
+                        }
+                        konvo+=bias_1Dreal_1[i];
+                        if(konvo<0.0){
+                            mezivrst.push_back(konvo * 0.01);
+                        }else{
+                            mezivrst.push_back(konvo * 0.01);
+                        }
+                    }
+                    vrstva1.push_back(mezivrst);
+                    mezivrst.clear();
+                }
+
+                for(int i = 0; i<5;i++){
+                    for(int j = 0; j<16;j++){
+                        double konvo = 0.0;
+                        for(int k = 0; k<15;k++){
+                            konvo += kernely_1Dreal_1[i][k] * R_val_vstup[kroky +j+k];
+                        }
+                        konvo+=bias_1Dreal_1[i];
+                        if(konvo<0.0){
+                            mezivrst.push_back(konvo * 0.01);
+                        }else{
+                            mezivrst.push_back(konvo);
+                        }
+                    }
+                    vrstva1.push_back(mezivrst);
+                    mezivrst.clear();
+                }
+                
+
+                for(int i = 0; i<2;i++){
+                    for(int j = 0; j<10; j++){
+                        for(int k = 0;k<7;k++){
+                            double konvo = 0.0;
+                            for(int l = 0; l<10;l++){
+                                konvo+=kernely_1Dreal_2[i][l]*vrstva1[j][k+l];
+                            }
+                            konvo+=bias_1Dreal_2[i];
+                            if(konvo<0.0){
+                                mezivrst.push_back(konvo * 0.01);
+                            }else{
+                                mezivrst.push_back(konvo);
+                            }
+                        }
+                        vrstva2.push_back(mezivrst);
+                        mezivrst.clear();
+                    }
+                }
+
+                for(int i = 0; i<2;i++){
+                    for(int j = 0; j<20; j++){
+                            double konvo = 0.0;
+                            for(int l = 0; l<7;l++){
+                                konvo+=kernely_1Dreal_3[i][l]*vrstva2[j][l];
+                            }
+                            konvo+=bias_1Dreal_3[i];
+                            if(konvo<0.0){
+                                vystzkonv.push_back(konvo * 0.01);
+                            }else{
+                                vystzkonv.push_back(konvo);
+                            }
+                    }
+                }
+
+                //// MLP //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                pom_vystup.clear();
+                for (int i = 0; i < rozmery[0]; ++i) {
+                    sit[0][i].set_vstupy(vystzkonv);
+                    sit[0][i].vypocet();
+                    pom_vystup.push_back(sit[0][i].o);
+                }
+                
+                for (int i = 1; i < pocet_vrstev; ++i) {
+                    for (int j = 0; j < rozmery[i]; ++j) {
+                        sit[i][j].set_vstupy(pom_vystup);
+                        sit[i][j].vypocet();
+                    }
+                    pom_vystup.clear();
+                    for (int j = 0; j < rozmery[i]; ++j) {
+                        pom_vystup.push_back( sit[i][j].o);
+                    }
+                }
+                vystupy.push_back(pom_vystup[0]);
+            }
+    }else if (velic == 3){
+        if (Q_val_vstup.size() != R_val_vstup.size() || Q_val_vstup.size() != T_val_vstup.size()) {
+            std::cout << "vstupni řady nejsou stejně dlouhý";
+            exit(0);
+        }
+            for(int kroky = 0; kroky < (Q_val_vstup.size() - 30); kroky++){
+                vystzkonv.clear();
+                vrstva1.clear();
+                vrstva2.clear();
+
+                std::vector<double>mezivrst;
+                for(int i = 0; i<5;i++){
+                    for(int j = 0; j<16;j++){
+                        double konvo = 0.0;
+                        for(int k = 0; k<15;k++){
+                            konvo += kernely_1Dreal_1[i][k] * Q_val_vstup[kroky +j+k];
+                        }
+                        konvo+=bias_1Dreal_1[i];
+                        if(konvo<0.0){
+                            mezivrst.push_back(konvo * 0.01);
+                        }else{
+                            mezivrst.push_back(konvo);
+                        }
+                    }
+                    vrstva1.push_back(mezivrst);
+                    mezivrst.clear();
+                }
+
+                for(int i = 0; i<5;i++){
+                    for(int j = 0; j<16;j++){
+                        double konvo = 0.0;
+                        for(int k = 0; k<15;k++){
+                            konvo += kernely_1Dreal_1[i][k] * R_val_vstup[kroky +j+k];
+                        }
+                        konvo+=bias_1Dreal_1[i];
+                        if(konvo<0.0){
+                            mezivrst.push_back(konvo * 0.01);
+                        }else{
+                            mezivrst.push_back(konvo);
+                        }
+                    }
+                    vrstva1.push_back(mezivrst);
+                    mezivrst.clear();
+                }
+
+                for(int i = 0; i<5;i++){
+                    for(int j = 0; j<16;j++){
+                        double konvo = 0.0;
+                        for(int k = 0; k<15;k++){
+                            konvo += kernely_1Dreal_1[i][k] * T_val_vstup[kroky +j+k];
+                        }
+                        konvo+=bias_1Dreal_1[i];
+                        if(konvo<0.0){
+                            mezivrst.push_back(konvo * 0.01);
+                        }else{
+                            mezivrst.push_back(konvo);
+                        }
+                    }
+                    vrstva1.push_back(mezivrst);
+                    mezivrst.clear();
+                }
+
+                for(int i = 0; i<2;i++){
+                    for(int j = 0; j<15; j++){
+                        for(int k = 0;k<7;k++){
+                            double konvo = 0.0;
+                            for(int l = 0; l<10;l++){
+                                konvo+=kernely_1Dreal_2[i][l]*vrstva1[j][k+l];
+                            }
+                            konvo+=bias_1Dreal_2[i];
+                            if(konvo<0.0){
+                                mezivrst.push_back(konvo * 0.01);
+                            }else{
+                                mezivrst.push_back(konvo);
+                            }
+                        }
+                        vrstva2.push_back(mezivrst);
+                        mezivrst.clear();
+                    }
+                }
+
+                for(int i = 0; i<2;i++){
+                    for(int j = 0; j<30; j++){
+                            double konvo = 0.0;
+                            for(int l = 0; l<7;l++){
+                                konvo+=kernely_1Dreal_3[i][l]*vrstva2[j][l];
+                            }
+                            konvo+=bias_1Dreal_3[i];
+                            if(konvo<0.0){
+                                vystzkonv.push_back(konvo * 0.01);
+                            }else{
+                                vystzkonv.push_back(konvo);
+                            }
+                    }
+                }
+
+                //// MLP //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                pom_vystup.clear();
+                for (int i = 0; i < rozmery[0]; ++i) {
+                    sit[0][i].set_vstupy(vystzkonv);
+                    sit[0][i].vypocet();
+                    pom_vystup.push_back(sit[0][i].o);
+                }
+                
+                for (int i = 1; i < pocet_vrstev; ++i) {
+                    for (int j = 0; j < rozmery[i]; ++j) {
+                        sit[i][j].set_vstupy(pom_vystup);
+                        sit[i][j].vypocet();
+                    }
+                    pom_vystup.clear();
+                    for (int j = 0; j < rozmery[i]; ++j) {
+                        pom_vystup.push_back( sit[i][j].o);
+                    }
+                }
+                vystupy.push_back(pom_vystup[0]);
+            }
+        }
+    }
+
+double NN::random(double min, double max){
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::normal_distribution<> dis(min,max);
+    return dis(gen);
 }

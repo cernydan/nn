@@ -318,13 +318,13 @@ output_folder <- "D:/pokusydip/"
 x = 1
 vysl = data.frame()
 vysl_cr = list()
-for(q in 1){
-for(o in 3){
-  for(n in c(3)){
+for(q in 1:2){
+for(o in 2:3){
+  for(n in c(10,14)){
     for(m in c(30)){
       for(l in c(15)){
-        for(k in c(100)){
-          for(i in 1:5){
+        for(k in c(100,200)){
+          for(i in 1){
             
             ker = n
             poc_ker = m
@@ -787,6 +787,168 @@ for(i in 4){
   }}}}}}
 
 vysl[vysl$pi == max(vysl$pi),]
+
+#########################################################################################x
+#########################       REAL 1D CNN          #####################################
+#########################################################################################
+
+{library(Rcpp)
+  setwd("C:/Users/danek/Desktop/mlpR/vsnn")
+  library(ggplot2)
+  Rcpp::sourceCpp("rcppstuff.cpp")
+  povodi <- list()
+  minmax <- data.frame()
+  for(i in 1:5){
+    Qcamel <- read.table(paste0("./vyberdata/",i,"_q.txt"), header=FALSE)
+    Qcamel <- Qcamel[!(Qcamel$V3 == 2 & Qcamel$V4 == 29), ]  
+    Rcamel <- read.table(paste0("./vyberdata/",i,"_r.txt"), header=FALSE, skip = 4)
+    Rcamel <- Rcamel[!(Rcamel$V2 == 2 & Rcamel$V3 == 29), ]  
+    cur_pov <- data.frame(Datum = as.Date(paste(Rcamel$V1,Rcamel$V2,Rcamel$V3, sep = "-")),
+                          Q = (Qcamel$V5 * 0.0283168466), R = Rcamel$V6, Tmax = Rcamel$V9)
+    minmax[i,1] = mean(cur_pov$Q)
+    minmax[i,2] = sd(cur_pov$Q)
+    cur_pov$Q <- (cur_pov$Q - mean(cur_pov$Q))/sd(cur_pov$Q)
+    cur_pov$R <- (cur_pov$R - mean(cur_pov$R))/sd(cur_pov$R)
+    cur_pov$Tmax <- (cur_pov$Tmax - mean(cur_pov$Tmax))/sd(cur_pov$Tmax)
+    povodi[[i]] <- cur_pov
+    rm(cur_pov,Qcamel,Rcamel)
+  }
+  names(minmax) <- c("minQ","maxQ")
+  names_povodi <- c("salmon","bigsur","merced","arroyo","andreas")
+  names(povodi) <- names_povodi
+  
+  mae <- function(mod, obs) {
+    if (length(mod) != length(obs)) {
+      stop("Vektory musí mít stejnou délku")
+    }
+    err = 0
+    for (i in 1:length(mod)){
+      err = err + abs(mod[i] - obs[i])
+    }
+    err = err/length(mod)
+    return(err)
+  }
+  
+  rmse <- function(mod, obs) {
+    if (length(mod) != length(obs)) {
+      stop("Vektory musí mít stejnou délku")
+    }
+    err = 0
+    for (i in 1:length(mod)){
+      err = err + (mod[i] - obs[i])^2
+    }
+    err = sqrt(err/length(mod))
+    return(err)
+  }
+  
+  nse <- function(mod, obs) {
+    if (length(mod) != length(obs)) {
+      stop("Vektory musí mít stejnou délku")
+    }
+    err = 0
+    cit = 0
+    jme = 0
+    for (i in 1:length(mod)){
+      cit = cit + (obs[i] - mod[i])^2
+      jme = jme + (obs[i] - mean(obs))^2
+    }
+    err = 1-(cit/length(mod))/(jme/length(mod))
+    return(err)
+  }
+  
+  pi <- function(mod, obs) {
+    if (length(mod) != length(obs)) {
+      stop("Vektory musí mít stejnou délku")
+    }
+    err = 0
+    cit = 0
+    jme = 0
+    for (i in 2:length(mod)){
+      cit = cit + (obs[i] - mod[i])^2
+      jme = jme + (obs[i] - obs[i-1])^2
+    }
+    err = 1-(cit/length(mod))/(jme/length(mod))
+    return(err)
+  }
+  
+}  # nacteni Rcpp, dat a funkce kriterii
+output_folder <- "D:/pokusydip/"
+x = 1
+vysl = data.frame()
+vysl_cr = list()
+for(pokus in 1){
+  for(l in 2:3){
+    for(k in 1000){
+      for(j in c(50)){
+        for(i in 1:5){
+          iter = j
+          velic = l
+          
+          mlp <- udelej_nn()
+          nn_init_nn(mlp,(20*l),c(20,20,1))
+          nn_set_vstup_rady(mlp, povodi[[i]]$Q[1:k],
+                            povodi[[i]]$Q[(k+1):12000], 
+                            povodi[[i]]$R[1:k],
+                            povodi[[i]]$R[(k+1):12000], 
+                            povodi[[i]]$Tmax[1:k],
+                            povodi[[i]]$Tmax[(k+1):12000]
+          )
+          nn_cnn_full_cal(mlp,iter,velic)
+          nn_cnn_full_val(mlp,velic)
+          vystupy <- nn_get_vystupy(mlp)
+          
+          # Vytvoření datového rámce pro ggplot
+          df_plot <- data.frame(
+            Datum = povodi[[i]]$Datum[(k+31):12000],
+            Q_měřené = povodi[[i]]$Q[(k+31):12000]*minmax[i,2]+minmax[i,1],
+            Q_modelované = vystupy*minmax[i,2]+minmax[i,1]
+          )
+          
+          # Vytvoření ggplot objektu
+          plot <- ggplot(df_plot, aes(x = Datum)) +
+            geom_line(aes(y = Q_měřené, color = "Měřené"), linewidth = 0.6) +
+            geom_line(aes(y = Q_modelované, color = "Model"), linewidth = 0.45, linetype = "dashed") +
+            scale_color_manual(values = c("Měřené" = "black", "Model" = "red")) +
+            labs(
+              title = paste0("povodi=", i, " iter=", iter, " velic=", velic),
+              subtitle = paste0(
+                "mae=", round(mae(df_plot$Q_modelované, df_plot$Q_měřené),3), 
+                "    rmse=", round(rmse(df_plot$Q_modelované, df_plot$Q_měřené),3), 
+                "    nse=", round(nse(df_plot$Q_modelované, df_plot$Q_měřené),3), 
+                "    pi=", round(pi(df_plot$Q_modelované, df_plot$Q_měřené),3)
+              ),
+              x = NULL,
+              y = "Q [m3/s]",
+              colour = NULL
+            ) +
+            theme_minimal() +
+            theme(
+              legend.position = "bottom",
+              plot.title = element_text(size = 14, face = "bold"),
+              plot.subtitle = element_text(size = 10)
+            )
+          
+          cur_id = paste0(i,"_",iter,"_",velic,"_f","_1D","___",pokus)
+          # Uložení grafu do souboru
+          file_path <- file.path(output_folder, paste0(cur_id, ".png"))
+          ggsave(file_path, plot = plot, width = 8, height = 6, dpi = 300, bg = "white")
+          
+          print(x)
+          vysl[x,1] = i
+          vysl[x,2] = iter
+          vysl[x,3] = velic
+          vysl[x,4] = round(mae(df_plot$Q_modelované,df_plot$Q_měřené),3)
+          vysl[x,5] = round(rmse(df_plot$Q_modelované,df_plot$Q_měřené),3)
+          vysl[x,6] = round(nse(df_plot$Q_modelované,df_plot$Q_měřené),3)
+          vysl[x,7] = round(pi(df_plot$Q_modelované,df_plot$Q_měřené),3)
+          vysl[x,8] = x
+          vysl[x,9] = cur_id
+          vysl_cr[[x]] <- df_plot
+          x= x+1
+          names(vysl) = c("povodi","iter","velic","mae","rmse","nse","pi","x","id")
+          saveRDS(vysl,"D:/pokusydip/vysl.rds")
+          saveRDS(vysl_cr,"D:/pokusydip/vysl_cr.rds")
+        }}}}}
 #########################################################################################x
 #########################         FULL CNN          #####################################
 #########################################################################################
@@ -875,16 +1037,16 @@ output_folder <- "D:/pokusydip/"
 x = 1
 vysl = data.frame()
 vysl_cr = list()
-for(pokus in 1:50){
+for(pokus in 1){
 for(l in 2:3){
-for(k in 1200){
-for(j in c(100)){
+for(k in 6000){
+for(j in c(50,100)){
 for(i in 1:5){
   iter = j
   velic = l
   
   mlp <- udelej_nn()
-  nn_init_nn(mlp,(50*l),c((50*l),(50*l),6))
+  nn_init_nn(mlp,(50*l),c((10*l),(10*l),1))
   nn_set_vstup_rady(mlp, povodi[[i]]$Q[1:k],
                     povodi[[i]]$Q[(k+1):12000], 
                     povodi[[i]]$R[1:k],
@@ -898,8 +1060,8 @@ for(i in 1:5){
 
   # Vytvoření datového rámce pro ggplot
   df_plot <- data.frame(
-    Datum = povodi[[i]]$Datum[(k+43):12006],
-    Q_měřené = povodi[[i]]$Q[(k+43):12006]*minmax[i,2]+minmax[i,1],
+    Datum = povodi[[i]]$Datum[(k+37):12000],
+    Q_měřené = povodi[[i]]$Q[(k+37):12000]*minmax[i,2]+minmax[i,1],
     Q_modelované = vystupy*minmax[i,2]+minmax[i,1]
   )
   

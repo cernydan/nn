@@ -43,6 +43,18 @@ void nastav_t(long int start, long int konec,Tenzor<T>& tenzor,const Matice<T>& 
 }
 
 int main() {
+    std::vector<double> vec;
+    for(int i = 0;i<10;i++){
+        vec.push_back(1+i);
+    }
+    for(int i = 0;i<3;i++){
+        vec.push_back(0.0);
+        vec.insert(vec.begin(), 0.0);
+    }
+    for(int i = 0;i<vec.size();i++){
+        std::cout<<vec[i]<<" ";
+    }
+    
 
     auto start = high_resolution_clock::now();
 

@@ -70,6 +70,16 @@ public:
     void cnn1D_val(int velic);
     void cnnonfly_cal(size_t row_ker, size_t col_ker, size_t poc_ker, int iter, int velic);
     void cnnonfly_val(int velic);
+    void cnn1Dreal_cal(int iter, int velic);
+    void cnn1Dreal_val(int velic);
+    std::vector<std::vector<double>> kernely_1Dreal_1;
+    std::vector<std::vector<double>> kernely_1Dreal_2;
+    std::vector<std::vector<double>> kernely_1Dreal_3;
+    std::vector<double> bias_1Dreal_1;
+    std::vector<double> bias_1Dreal_2;
+    std::vector<double> bias_1Dreal_3;
+
+
     Tenzor<double> kernely_onfly_Q;
     Tenzor<double> kernely_onfly_R;
     Tenzor<double> kernely_onfly_T;
@@ -98,6 +108,8 @@ public:
     std::vector<double> Q_val_vstup;
     std::vector<double> R_val_vstup;
     std::vector<double> T_val_vstup;
+
+    double random(double min, double max);
 };
 
 #endif // NEURAL_NET_H
