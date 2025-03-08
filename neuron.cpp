@@ -11,7 +11,7 @@ Neuron::Neuron()    //konstruktor
     o = 0.0;
     delta = 0.0;
     bias = true;
-    aktfunkce = sigmoid;
+    aktfunkce = leakyrelu;
     Mt.clear();
     Mt_s.clear();
     Vt.clear();
