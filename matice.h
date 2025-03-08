@@ -40,6 +40,7 @@ public:
     void resize(size_t radky, size_t sloupce);
     void o180_nuly(size_t layers);
     void sloupce_nakonec(size_t pocet_sloupcu);
+    void flip_cols_and_pad(size_t pad);
 
     
 };

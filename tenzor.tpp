@@ -262,10 +262,10 @@ void Tenzor<T>::add_matrix(const Matice<T>& matice) {
 }
 
 template<typename T>
-void Tenzor<T>::rand_vypln(double min, double max){
+void Tenzor<T>::rand_vypln(double mean, double sd){
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::normal_distribution<> dis(min,max);
+    std::normal_distribution<> dis(mean,sd);
     for(int k = 0;k<depth;k++){
         for (int i = 0;i<rows;i++){
             for (int j = 0;j<cols;j++){

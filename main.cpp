@@ -17,43 +17,16 @@
 using namespace std;
 using namespace std::chrono;
 
-template<typename T>
-void nastav(long int kolik,Tenzor<T>& tenzor,const Matice<T>& matice){
-    if(kolik>tenzor.getDepth()){
-        std::cout << "Moc" << std::endl;
-        exit(0);
-    }
 
-    for(int i = 0; i<kolik;i++){
-        tenzor.set_matrix(i,matice);
-    }
-}
-
-template<typename T>
-void nastav_t(long int start, long int konec,Tenzor<T>& tenzor,const Matice<T>& matice){
-    if(konec>tenzor.getDepth()){
-        std::cout << "Moc" << std::endl;
-        exit(0);
-    }
-
-
-    for(int i = start; i<konec;i++){
-        tenzor.set_matrix(i,matice);
-    }
-}
 
 int main() {
-    std::vector<double> vec;
-    for(int i = 0;i<10;i++){
-        vec.push_back(1+i);
-    }
-    for(int i = 0;i<3;i++){
-        vec.push_back(0.0);
-        vec.insert(vec.begin(), 0.0);
-    }
-    for(int i = 0;i<vec.size();i++){
-        std::cout<<vec[i]<<" ";
-    }
+
+    Matice<double> pepa(3,5);
+    pepa.rand_vypln(1.0,10.0);
+    pepa.printMat();
+    pepa.flip_cols_and_pad(3);
+    pepa.printMat();
+
     
 
     auto start = high_resolution_clock::now();

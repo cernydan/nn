@@ -1122,10 +1122,10 @@ alfa = 0.0001;
     kernely_full_2_Q.resize(5,2,2);
     kernely_full_2_Q.rand_vypln(0.0,0.1);
     for (int k1_depth = 0;k1_depth<kernely_full_1_Q.getDepth();k1_depth++){
-        bias_full_k1_Q.push_back(0);
+        bias_full_k1_Q.push_back(0.0);
     }
     for (int k2_depth = 0;k2_depth<kernely_full_2_Q.getDepth();k2_depth++){
-        bias_full_k2_Q.push_back(0);
+        bias_full_k2_Q.push_back(0.0);
     }
 
     kernely_full_1_R.resize(10,3,3);
@@ -1133,10 +1133,10 @@ alfa = 0.0001;
     kernely_full_2_R.resize(5,2,2);
     kernely_full_2_R.rand_vypln(0.0,0.01);
     for (int k1_depth = 0;k1_depth<kernely_full_1_R.getDepth();k1_depth++){
-        bias_full_k1_R.push_back(0);
+        bias_full_k1_R.push_back(0.0);
     }
     for (int k2_depth = 0;k2_depth<kernely_full_2_R.getDepth();k2_depth++){
-        bias_full_k2_R.push_back(0);
+        bias_full_k2_R.push_back(0.0);
     }
 
     ////////////////////////////////KONVOLUCE
@@ -2665,47 +2665,36 @@ if(velic == 3){
 
 void NN::cnn1Dreal_cal(int iter, int velic){
     alfa = 0.0001;
-    kernely_1Dreal_1.clear();
-    kernely_1Dreal_2.clear();
-    kernely_1Dreal_3.clear();
+    kernely_1Dreal_1.resize(5,15);
+    kernely_1Dreal_2.resize(2,10);
+    kernely_1Dreal_3.resize(2,7);
 
     bias_1Dreal_1.clear();
     bias_1Dreal_2.clear();
     bias_1Dreal_3.clear();
 
-    std::vector<double>init;
-    for (int i = 0; i<5;i++){
-        for(int j = 0; j<15;j++){
-            init.push_back(random(0.0,0.1));
-        }
-        kernely_1Dreal_1.push_back(init);
-        init.clear();
+    kernely_1Dreal_1.rand_vypln(0.0,0.1);
+    kernely_1Dreal_2.rand_vypln(0.0,0.1);
+    kernely_1Dreal_3.rand_vypln(0.0,0.1);
 
+    for (int i = 0; i<5;i++){
         bias_1Dreal_1.push_back(0.0);
     }
 
     for (int i = 0; i<2;i++){
         for(int j = 0; j<10;j++){
-            init.push_back(random(0.0,0.1));
-        }
-        kernely_1Dreal_2.push_back(init);
-        init.clear();
-
-        for(int j = 0; j<7;j++){
-            init.push_back(random(0.0,0.1));
-        }
-        kernely_1Dreal_3.push_back(init);
-        init.clear();
-
         bias_1Dreal_2.push_back(0.0);
         bias_1Dreal_3.push_back(0.0);
     }
+    }
     std::vector<double> vystzkonv;
-    std::vector<std::vector<double>>vrstva1;
-    std::vector<std::vector<double>>vrstva2;
-    std::vector<std::vector<double>>delta_1_2;
-    std::vector<std::vector<double>>delta_2_3;
-    double deltazmlp; 
+    Matice<double>vrstva1;
+    Matice<double>vrstva2;
+    Matice<double>delta_1_2;
+    Matice<double>delta_2_3;
+    Matice<double>pomocdelt;
+    double deltazmlp;
+    double konvo = 0.0; 
     if(velic == 2){
         if (Q_kal_vstup.size() != R_kal_vstup.size()) {
             std::cout << "vstupni řady nejsou stejně dlouhý";
@@ -2714,73 +2703,71 @@ void NN::cnn1Dreal_cal(int iter, int velic){
     
     //////////////////////////////////////////////////////////// KALIBRACE //////////////////////////////////////////////////////
         for(int iters = 0; iters < iter; iters++){
+            std::cout<<iters<<"\n";
             for(int kroky = 0; kroky < (Q_kal_vstup.size() - 30); kroky++){
                 vystzkonv.clear();
-                vrstva1.clear();
-                vrstva2.clear();
-                delta_1_2.clear();
-                delta_2_3.clear();
+                vrstva1.resize(10,16);
+                vrstva2.resize(20,7);
+                delta_1_2.resize(4,16);
+                delta_2_3.resize(2,7);
+                pomocdelt.resize(0,0);
                 chtenejout.clear();
                 chtenejout.push_back(Q_kal_vstup[kroky+30]);
-                for(int i = 0; i<5;i++){
-                    for(int j = 0; j<16;j++){
-                        double konvo = 0.0;
-                        for(int k = 0; k<15;k++){
-                            konvo += kernely_1Dreal_1[i][k] * Q_kal_vstup[kroky +j+k];
-                        }
-                        konvo+=bias_1Dreal_1[i];
-                        if(konvo<0.0){
-                            init.push_back(konvo * 0.01);
-                        }else{
-                            init.push_back(konvo * 0.01);
-                        }
-                    }
-                    vrstva1.push_back(init);
-                    init.clear();
-                }
 
                 for(int i = 0; i<5;i++){
                     for(int j = 0; j<16;j++){
-                        double konvo = 0.0;
+                        konvo = 0.0;
                         for(int k = 0; k<15;k++){
-                            konvo += kernely_1Dreal_1[i][k] * R_kal_vstup[kroky +j+k];
+                            konvo += kernely_1Dreal_1.getElement(i,k) * Q_kal_vstup[kroky +j+k];
                         }
                         konvo+=bias_1Dreal_1[i];
                         if(konvo<0.0){
-                            init.push_back(konvo * 0.01);
+                            vrstva1.setElement(i,j,(konvo * 0.01));
                         }else{
-                            init.push_back(konvo);
+                            vrstva1.setElement(i,j,konvo);
                         }
                     }
-                    vrstva1.push_back(init);
-                    init.clear();
                 }
-                
+
+
+                for(int i = 0; i<5;i++){
+                    for(int j = 0; j<16;j++){
+                        konvo = 0.0;
+                        for(int k = 0; k<15;k++){
+                            konvo += kernely_1Dreal_1.getElement(i,k) * R_kal_vstup[kroky +j+k];
+                        }
+                        konvo+=bias_1Dreal_1[i];
+                        if(konvo<0.0){
+                            vrstva1.setElement(5+i,j,(konvo * 0.01));
+                        }else{
+                            vrstva1.setElement(5+i,j,konvo);
+                        }
+                    }
+                }
+
 
                 for(int i = 0; i<2;i++){
                     for(int j = 0; j<10; j++){
                         for(int k = 0;k<7;k++){
-                            double konvo = 0.0;
+                            konvo = 0.0;
                             for(int l = 0; l<10;l++){
-                                konvo+=kernely_1Dreal_2[i][l]*vrstva1[j][k+l];
+                                konvo+=kernely_1Dreal_2.getElement(i,l)*vrstva1.getElement(j,k+l);
                             }
                             konvo+=bias_1Dreal_2[i];
                             if(konvo<0.0){
-                                init.push_back(konvo * 0.01);
+                                vrstva2.setElement((i*10+j),k,(konvo * 0.01));
                             }else{
-                                init.push_back(konvo);
+                                vrstva2.setElement((i*10+j),k,konvo);
                             }
                         }
-                        vrstva2.push_back(init);
-                        init.clear();
                     }
                 }
 
                 for(int i = 0; i<2;i++){
                     for(int j = 0; j<20; j++){
-                            double konvo = 0.0;
+                            konvo = 0.0;
                             for(int l = 0; l<7;l++){
-                                konvo+=kernely_1Dreal_3[i][l]*vrstva2[j][l];
+                                konvo+=kernely_1Dreal_3.getElement(i,l) * vrstva2.getElement(j,l);
                             }
                             konvo+=bias_1Dreal_3[i];
                             if(konvo<0.0){
@@ -2834,39 +2821,27 @@ void NN::cnn1Dreal_cal(int iter, int velic){
                 sit[i][j].vahy[k] = sit[i][j].vahy[k] - alfa * sit[i][j].delta * sit[i][j].vstupy[k];
         }
     }
-
     ///////////////////////// CNN BACKPROP ////////////////////////////////////////////////////////////////////////////////////
     for (int neur = 0;neur<rozmery[0];++neur){
         deltazmlp = sit[0][neur].delta;
 
         for(int i = 0; i<2;i++){
             for(int j = 0; j<7;j++){
-                init.push_back(kernely_1Dreal_3[i][6-j] * deltazmlp);
+                delta_2_3.setElement(i,j,(kernely_1Dreal_3.getElement(i,(6-j)) * deltazmlp));
             }
-            delta_2_3.push_back(init);
-            init.clear();
         }
 
-        std::vector<double>obracfiltr;
         for(int i = 0; i<2;i++){
             for(int j = 0; j<2;j++){
-                for(int k=0;k<10;k++){
-                    obracfiltr.push_back(kernely_1Dreal_2[i][9-k]);
-                }
-                for(int k=0;k<6;k++){
-                    obracfiltr.push_back(0.0);
-                    obracfiltr.insert(obracfiltr.begin(), 0.0);
-                }
+                pomocdelt = kernely_1Dreal_2;
+                pomocdelt.flip_cols_and_pad(6);
                 for(int k = 0;k<16;k++){
-                    double konvo = 0.0;
+                    konvo = 0.0;
                     for(int l = 0;l<7;l++){
-                        konvo+=obracfiltr[k+l]*delta_2_3[j][l];
+                        konvo+=pomocdelt.getElement(i,(k+l))*delta_2_3.getElement(j,l);
                     }
-                    init.push_back(konvo);
+                    delta_1_2.setElement((i*2+j),k,konvo);
                 }
-                delta_1_2.push_back(init);
-                obracfiltr.clear();
-                init.clear();
             }
         }
 
@@ -2874,12 +2849,12 @@ void NN::cnn1Dreal_cal(int iter, int velic){
             for(int j = 0; j<20;j++){
                 if(vystzkonv[i*20+j]<0.0){    
                     for(int k = 0; k<7;k++){
-                        kernely_1Dreal_3[i][j] -= 0.01 * alfa * vrstva2[j][k]*deltazmlp;
+                        kernely_1Dreal_3.setElement(i,k,(kernely_1Dreal_3.getElement(i,k) - 0.01 * alfa * vrstva2.getElement(j,k)*deltazmlp));
                     }
                     bias_1Dreal_3[i]-=0.01 * alfa * deltazmlp;
                 }else{
                     for(int k = 0; k<7;k++){
-                        kernely_1Dreal_3[i][j] -= alfa * vrstva2[j][k]*deltazmlp;
+                        kernely_1Dreal_3.setElement(i,k,(kernely_1Dreal_3.getElement(i,k) - alfa * vrstva2.getElement(j,k)*deltazmlp));
                     }
                     bias_1Dreal_3[i] -= alfa * deltazmlp;
                 }
@@ -2891,16 +2866,16 @@ void NN::cnn1Dreal_cal(int iter, int velic){
                 for(int k = 0;k<10;k++){
                     for(int m = 0;m<7;m++){
                         for (int l = 0;l<10;l++){
-                            if(vrstva2[i*10+k][m]<0.0){
-                                kernely_1Dreal_2[i][l]-= 0.01 * alfa * vrstva1[k][l+m] * delta_2_3[j][m];
+                            if(vrstva2.getElement((i*10+k),m)<0.0){
+                                kernely_1Dreal_2.setElement(i,l,(kernely_1Dreal_2.getElement(i,l) - 0.01 * alfa * vrstva1.getElement(k,(l+m)) * delta_2_3.getElement(j,m)));
                             }else{
-                                kernely_1Dreal_2[i][l]-= alfa * vrstva1[k][l+m] * delta_2_3[j][m];
+                                kernely_1Dreal_2.setElement(i,l,(kernely_1Dreal_2.getElement(i,l) - alfa * vrstva1.getElement(k,(l+m)) * delta_2_3.getElement(j,m)));
                             }
                         }
-                        if(vrstva2[i*10+k][m]<0.0){
-                            bias_1Dreal_2[i] -= 0.01 * alfa * delta_2_3[j][m];
+                        if(vrstva2.getElement((i*10+k),m)<0.0){
+                            bias_1Dreal_2[i] -= 0.01 * alfa * delta_2_3.getElement(j,m);
                         }else{
-                            bias_1Dreal_2[i] -= alfa * delta_2_3[j][m];
+                            bias_1Dreal_2[i] -= alfa * delta_2_3.getElement(j,m);
                         }
                     }
                 }
@@ -2911,16 +2886,16 @@ void NN::cnn1Dreal_cal(int iter, int velic){
             for(int j = 0; j<4;j++){
                     for(int m = 0;m<16;m++){
                         for (int l = 0;l<15;l++){
-                            if(vrstva1[i][m]<0.0){
-                                kernely_1Dreal_1[i][l]-= 0.01 * alfa * Q_kal_vstup[kroky +l+m] * delta_1_2[j][m];
+                            if(vrstva1.getElement(i,m)<0.0){
+                                kernely_1Dreal_1.setElement(i,l,(kernely_1Dreal_1.getElement(i,l) - 0.01 * alfa * Q_kal_vstup[kroky +l+m] * delta_1_2.getElement(j,m)));
                             }else{
-                                kernely_1Dreal_1[i][l]-= alfa * Q_kal_vstup[kroky +l+m] * delta_1_2[j][m];
+                                kernely_1Dreal_1.setElement(i,l,(kernely_1Dreal_1.getElement(i,l) - alfa * Q_kal_vstup[kroky +l+m] * delta_1_2.getElement(j,m)));
                             }
                         }
-                        if(vrstva1[i][m]<0.0){
-                            bias_1Dreal_1[i] -= 0.01 * alfa * delta_1_2[j][m];
+                        if(vrstva1.getElement(i,m)<0.0){
+                            bias_1Dreal_1[i] -= 0.01 * alfa * delta_1_2.getElement(j,m);
                         }else{
-                            bias_1Dreal_1[i] -= alfa * delta_1_2[j][m];
+                            bias_1Dreal_1[i] -= alfa * delta_1_2.getElement(j,m);
                         }
                     }
             
@@ -2931,16 +2906,16 @@ void NN::cnn1Dreal_cal(int iter, int velic){
             for(int j = 0; j<4;j++){
                     for(int m = 0;m<16;m++){
                         for (int l = 0;l<15;l++){
-                            if(vrstva1[5+i][m]<0.0){
-                                kernely_1Dreal_1[i][l]-= 0.01 * alfa * R_kal_vstup[kroky +l+m] * delta_1_2[j][m];
+                            if(vrstva1.getElement((5+i),(m))<0.0){
+                                kernely_1Dreal_1.setElement(i,l,(kernely_1Dreal_1.getElement(i,l) - 0.01 * alfa * R_kal_vstup[kroky +l+m] * delta_1_2.getElement(j,m)));
                             }else{
-                                kernely_1Dreal_1[i][l]-= alfa * R_kal_vstup[kroky +l+m] * delta_1_2[j][m];
+                                kernely_1Dreal_1.setElement(i,l,(kernely_1Dreal_1.getElement(i,l) - alfa * R_kal_vstup[kroky +l+m] * delta_1_2.getElement(j,m)));
                             }
                         }
-                        if(vrstva1[i][m]<0.0){
-                            bias_1Dreal_1[i] -= 0.01 * alfa * delta_1_2[j][m];
+                        if(vrstva1.getElement((5+i),(m))<0.0){
+                            bias_1Dreal_1[i] -= 0.01 * alfa * delta_1_2.getElement(j,m);
                         }else{
-                            bias_1Dreal_1[i] -= alfa * delta_1_2[j][m];
+                            bias_1Dreal_1[i] -= alfa * delta_1_2.getElement(j,m);
                         }
                     }
             
@@ -2960,89 +2935,84 @@ void NN::cnn1Dreal_cal(int iter, int velic){
     
     //////////////////////////////////////////////////////////// KALIBRACE //////////////////////////////////////////////////////
         for(int iters = 0; iters < iter; iters++){
+            std::cout<<iters;
             for(int kroky = 0; kroky < (Q_kal_vstup.size() - 30); kroky++){
                 vystzkonv.clear();
-                vrstva1.clear();
-                vrstva2.clear();
-                delta_1_2.clear();
-                delta_2_3.clear();
+                vrstva1.resize(15,16);
+                vrstva2.resize(30,7);
+                delta_1_2.resize(4,16);
+                delta_2_3.resize(2,7);
+                pomocdelt.resize(0,0);
                 chtenejout.clear();
                 chtenejout.push_back(Q_kal_vstup[kroky+30]);
+
                 for(int i = 0; i<5;i++){
                     for(int j = 0; j<16;j++){
-                        double konvo = 0.0;
+                        konvo = 0.0;
                         for(int k = 0; k<15;k++){
-                            konvo += kernely_1Dreal_1[i][k] * Q_kal_vstup[kroky +j+k];
+                            konvo += kernely_1Dreal_1.getElement(i,k) * Q_kal_vstup[kroky +j+k];
                         }
                         konvo+=bias_1Dreal_1[i];
                         if(konvo<0.0){
-                            init.push_back(konvo * 0.01);
+                            vrstva1.setElement(i,j,(konvo * 0.01));
                         }else{
-                            init.push_back(konvo);
+                            vrstva1.setElement(i,j,konvo);
                         }
                     }
-                    vrstva1.push_back(init);
-                    init.clear();
                 }
 
                 for(int i = 0; i<5;i++){
                     for(int j = 0; j<16;j++){
-                        double konvo = 0.0;
+                        konvo = 0.0;
                         for(int k = 0; k<15;k++){
-                            konvo += kernely_1Dreal_1[i][k] * R_kal_vstup[kroky +j+k];
+                            konvo += kernely_1Dreal_1.getElement(i,k) * R_kal_vstup[kroky +j+k];
                         }
                         konvo+=bias_1Dreal_1[i];
                         if(konvo<0.0){
-                            init.push_back(konvo * 0.01);
+                            vrstva1.setElement(5+i,j,(konvo * 0.01));
                         }else{
-                            init.push_back(konvo);
+                            vrstva1.setElement(5+i,j,konvo);
                         }
                     }
-                    vrstva1.push_back(init);
-                    init.clear();
                 }
 
                 for(int i = 0; i<5;i++){
                     for(int j = 0; j<16;j++){
-                        double konvo = 0.0;
+                        konvo = 0.0;
                         for(int k = 0; k<15;k++){
-                            konvo += kernely_1Dreal_1[i][k] * T_kal_vstup[kroky +j+k];
+                            konvo += kernely_1Dreal_1.getElement(i,k) * T_kal_vstup[kroky +j+k];
                         }
                         konvo+=bias_1Dreal_1[i];
                         if(konvo<0.0){
-                            init.push_back(konvo * 0.01);
+                            vrstva1.setElement(10+i,j,(konvo * 0.01));
                         }else{
-                            init.push_back(konvo);
+                            vrstva1.setElement(10+i,j,konvo);
                         }
                     }
-                    vrstva1.push_back(init);
-                    init.clear();
                 }
 
                 for(int i = 0; i<2;i++){
                     for(int j = 0; j<15; j++){
                         for(int k = 0;k<7;k++){
-                            double konvo = 0.0;
+                            konvo = 0.0;
                             for(int l = 0; l<10;l++){
-                                konvo+=kernely_1Dreal_2[i][l]*vrstva1[j][k+l];
+                                konvo+=kernely_1Dreal_2.getElement(i,l)*vrstva1.getElement(j,k+l);
                             }
                             konvo+=bias_1Dreal_2[i];
                             if(konvo<0.0){
-                                init.push_back(konvo * 0.01);
+                                vrstva2.setElement((i*15+j),k,(konvo * 0.01));
                             }else{
-                                init.push_back(konvo);
+                                vrstva2.setElement((i*15+j),k,konvo);
                             }
                         }
-                        vrstva2.push_back(init);
-                        init.clear();
                     }
                 }
 
                 for(int i = 0; i<2;i++){
                     for(int j = 0; j<30; j++){
-                            double konvo = 0.0;
+                            konvo = 0.0;
                             for(int l = 0; l<7;l++){
-                                konvo+=kernely_1Dreal_3[i][l]*vrstva2[j][l];
+                                konvo+=kernely_1Dreal_3.getElement(i,l) * vrstva2.getElement(j,l);
                             }
                             konvo+=bias_1Dreal_3[i];
                             if(konvo<0.0){
@@ -3100,34 +3070,24 @@ void NN::cnn1Dreal_cal(int iter, int velic){
     for (int neur = 0;neur<rozmery[0];++neur){
         deltazmlp = sit[0][neur].delta;
 
+        
         for(int i = 0; i<2;i++){
             for(int j = 0; j<7;j++){
-                init.push_back(kernely_1Dreal_3[i][6-j] * deltazmlp);
+                delta_2_3.setElement(i,j,(kernely_1Dreal_3.getElement(i,(6-j)) * deltazmlp));
             }
-            delta_2_3.push_back(init);
-            init.clear();
         }
 
-        std::vector<double>obracfiltr;
         for(int i = 0; i<2;i++){
             for(int j = 0; j<2;j++){
-                for(int k=0;k<10;k++){
-                    obracfiltr.push_back(kernely_1Dreal_2[i][9-k]);
-                }
-                for(int k=0;k<6;k++){
-                    obracfiltr.push_back(0.0);
-                    obracfiltr.insert(obracfiltr.begin(), 0.0);
-                }
+                pomocdelt = kernely_1Dreal_2;
+                pomocdelt.flip_cols_and_pad(6);
                 for(int k = 0;k<16;k++){
-                    double konvo = 0.0;
+                    konvo = 0.0;
                     for(int l = 0;l<7;l++){
-                        konvo+=obracfiltr[k+l]*delta_2_3[j][l];
+                        konvo+=pomocdelt.getElement(i,(k+l))*delta_2_3.getElement(j,l);
                     }
-                    init.push_back(konvo);
+                    delta_1_2.setElement((i*2+j),k,konvo);
                 }
-                delta_1_2.push_back(init);
-                obracfiltr.clear();
-                init.clear();
             }
         }
 
@@ -3135,12 +3095,12 @@ void NN::cnn1Dreal_cal(int iter, int velic){
             for(int j = 0; j<30;j++){
                 if(vystzkonv[i*30+j]<0.0){    
                     for(int k = 0; k<7;k++){
-                        kernely_1Dreal_3[i][j] -= 0.01 * alfa * vrstva2[j][k]*deltazmlp;
+                        kernely_1Dreal_3.setElement(i,k,(kernely_1Dreal_3.getElement(i,k) - 0.01 * alfa * vrstva2.getElement(j,k)*deltazmlp));
                     }
                     bias_1Dreal_3[i]-=0.01 * alfa * deltazmlp;
                 }else{
                     for(int k = 0; k<7;k++){
-                        kernely_1Dreal_3[i][j] -= alfa * vrstva2[j][k]*deltazmlp;
+                        kernely_1Dreal_3.setElement(i,k,(kernely_1Dreal_3.getElement(i,k) - alfa * vrstva2.getElement(j,k)*deltazmlp));
                     }
                     bias_1Dreal_3[i] -= alfa * deltazmlp;
                 }
@@ -3152,16 +3112,16 @@ void NN::cnn1Dreal_cal(int iter, int velic){
                 for(int k = 0;k<15;k++){
                     for(int m = 0;m<7;m++){
                         for (int l = 0;l<10;l++){
-                            if(vrstva2[i*15+k][m]<0.0){
-                                kernely_1Dreal_2[i][l]-= 0.01 * alfa * vrstva1[k][l+m] * delta_2_3[j][m];
+                            if(vrstva2.getElement((i*15+k),m)<0.0){
+                                kernely_1Dreal_2.setElement(i,l,(kernely_1Dreal_2.getElement(i,l) - 0.01 * alfa * vrstva1.getElement(k,(l+m)) * delta_2_3.getElement(j,m)));
                             }else{
-                                kernely_1Dreal_2[i][l]-= alfa * vrstva1[k][l+m] * delta_2_3[j][m];
+                                kernely_1Dreal_2.setElement(i,l,(kernely_1Dreal_2.getElement(i,l) - alfa * vrstva1.getElement(k,(l+m)) * delta_2_3.getElement(j,m)));
                             }
                         }
-                        if(vrstva2[i*15+k][m]<0.0){
-                            bias_1Dreal_2[i] -= 0.01 * alfa * delta_2_3[j][m];
+                        if(vrstva2.getElement((i*15+k),m)<0.0){
+                            bias_1Dreal_2[i] -= 0.01 * alfa * delta_2_3.getElement(j,m);
                         }else{
-                            bias_1Dreal_2[i] -= alfa * delta_2_3[j][m];
+                            bias_1Dreal_2[i] -= alfa * delta_2_3.getElement(j,m);
                         }
                     }
                 }
@@ -3172,16 +3132,16 @@ void NN::cnn1Dreal_cal(int iter, int velic){
             for(int j = 0; j<4;j++){
                     for(int m = 0;m<16;m++){
                         for (int l = 0;l<15;l++){
-                            if(vrstva1[i][m]<0.0){
-                                kernely_1Dreal_1[i][l]-= 0.01 * alfa * Q_kal_vstup[kroky +l+m] * delta_1_2[j][m];
+                            if(vrstva1.getElement(i,m)<0.0){
+                                kernely_1Dreal_1.setElement(i,l,(kernely_1Dreal_1.getElement(i,l) - 0.01 * alfa * Q_kal_vstup[kroky +l+m] * delta_1_2.getElement(j,m)));
                             }else{
-                                kernely_1Dreal_1[i][l]-= alfa * Q_kal_vstup[kroky +l+m] * delta_1_2[j][m];
+                                kernely_1Dreal_1.setElement(i,l,(kernely_1Dreal_1.getElement(i,l) - alfa * Q_kal_vstup[kroky +l+m] * delta_1_2.getElement(j,m)));
                             }
                         }
-                        if(vrstva1[i][m]<0.0){
-                            bias_1Dreal_1[i] -= 0.01 * alfa * delta_1_2[j][m];
+                        if(vrstva1.getElement(i,m)<0.0){
+                            bias_1Dreal_1[i] -= 0.01 * alfa * delta_1_2.getElement(j,m);
                         }else{
-                            bias_1Dreal_1[i] -= alfa * delta_1_2[j][m];
+                            bias_1Dreal_1[i] -= alfa * delta_1_2.getElement(j,m);
                         }
                     }
             
@@ -3192,16 +3152,16 @@ void NN::cnn1Dreal_cal(int iter, int velic){
             for(int j = 0; j<4;j++){
                     for(int m = 0;m<16;m++){
                         for (int l = 0;l<15;l++){
-                            if(vrstva1[5+i][m]<0.0){
-                                kernely_1Dreal_1[i][l]-= 0.01 * alfa * R_kal_vstup[kroky +l+m] * delta_1_2[j][m];
+                            if(vrstva1.getElement((5+i),(m))<0.0){
+                                kernely_1Dreal_1.setElement(i,l,(kernely_1Dreal_1.getElement(i,l) - 0.01 * alfa * R_kal_vstup[kroky +l+m] * delta_1_2.getElement(j,m)));
                             }else{
-                                kernely_1Dreal_1[i][l]-= alfa * R_kal_vstup[kroky +l+m] * delta_1_2[j][m];
+                                kernely_1Dreal_1.setElement(i,l,(kernely_1Dreal_1.getElement(i,l) - alfa * R_kal_vstup[kroky +l+m] * delta_1_2.getElement(j,m)));
                             }
                         }
-                        if(vrstva1[i][m]<0.0){
-                            bias_1Dreal_1[i] -= 0.01 * alfa * delta_1_2[j][m];
+                        if(vrstva1.getElement((5+i),(m))<0.0){
+                            bias_1Dreal_1[i] -= 0.01 * alfa * delta_1_2.getElement(j,m);
                         }else{
-                            bias_1Dreal_1[i] -= alfa * delta_1_2[j][m];
+                            bias_1Dreal_1[i] -= alfa * delta_1_2.getElement(j,m);
                         }
                     }
             
@@ -3212,16 +3172,16 @@ void NN::cnn1Dreal_cal(int iter, int velic){
             for(int j = 0; j<4;j++){
                     for(int m = 0;m<16;m++){
                         for (int l = 0;l<15;l++){
-                            if(vrstva1[10+i][m]<0.0){
-                                kernely_1Dreal_1[i][l]-= 0.01 * alfa * T_kal_vstup[kroky +l+m] * delta_1_2[j][m];
+                            if(vrstva1.getElement((10+i),(m))<0.0){
+                                kernely_1Dreal_1.setElement(i,l,(kernely_1Dreal_1.getElement(i,l) - 0.01 * alfa * T_kal_vstup[kroky +l+m] * delta_1_2.getElement(j,m)));
                             }else{
-                                kernely_1Dreal_1[i][l]-= alfa * T_kal_vstup[kroky +l+m] * delta_1_2[j][m];
+                                kernely_1Dreal_1.setElement(i,l,(kernely_1Dreal_1.getElement(i,l) - alfa * T_kal_vstup[kroky +l+m] * delta_1_2.getElement(j,m)));
                             }
                         }
-                        if(vrstva1[i][m]<0.0){
-                            bias_1Dreal_1[i] -= 0.01 * alfa * delta_1_2[j][m];
+                        if(vrstva1.getElement((10+i),(m))<0.0){
+                            bias_1Dreal_1[i] -= 0.01 * alfa * delta_1_2.getElement(j,m);
                         }else{
-                            bias_1Dreal_1[i] -= alfa * delta_1_2[j][m];
+                            bias_1Dreal_1[i] -= alfa * delta_1_2.getElement(j,m);
                         }
                     }
             
@@ -3237,9 +3197,10 @@ void NN::cnn1Dreal_cal(int iter, int velic){
 }
 void NN::cnn1Dreal_val(int velic){
     vystupy.clear();
+    double konvo = 0.0;
     std::vector<double> vystzkonv;
-    std::vector<std::vector<double>>vrstva1;
-    std::vector<std::vector<double>>vrstva2; 
+    Matice<double>vrstva1;
+    Matice<double>vrstva2;
     if(velic == 2){
         if (Q_val_vstup.size() != R_val_vstup.size()) {
             std::cout << "vstupni řady nejsou stejně dlouhý";
@@ -3248,69 +3209,63 @@ void NN::cnn1Dreal_val(int velic){
     
             for(int kroky = 0; kroky < (Q_val_vstup.size() - 30); kroky++){
                 vystzkonv.clear();
-                vrstva1.clear();
-                vrstva2.clear();
-
-                std::vector<double>mezivrst;
-                for(int i = 0; i<5;i++){
-                    for(int j = 0; j<16;j++){
-                        double konvo = 0.0;
-                        for(int k = 0; k<15;k++){
-                            konvo += kernely_1Dreal_1[i][k] * Q_val_vstup[kroky +j+k];
-                        }
-                        konvo+=bias_1Dreal_1[i];
-                        if(konvo<0.0){
-                            mezivrst.push_back(konvo * 0.01);
-                        }else{
-                            mezivrst.push_back(konvo * 0.01);
-                        }
-                    }
-                    vrstva1.push_back(mezivrst);
-                    mezivrst.clear();
-                }
+                vrstva1.resize(10,16);
+                vrstva2.resize(20,7);
 
                 for(int i = 0; i<5;i++){
                     for(int j = 0; j<16;j++){
-                        double konvo = 0.0;
+                        konvo = 0.0;
                         for(int k = 0; k<15;k++){
-                            konvo += kernely_1Dreal_1[i][k] * R_val_vstup[kroky +j+k];
+                            konvo += kernely_1Dreal_1.getElement(i,k) * Q_val_vstup[kroky +j+k];
                         }
                         konvo+=bias_1Dreal_1[i];
                         if(konvo<0.0){
-                            mezivrst.push_back(konvo * 0.01);
+                            vrstva1.setElement(i,j,(konvo * 0.01));
                         }else{
-                            mezivrst.push_back(konvo);
+                            vrstva1.setElement(i,j,konvo);
                         }
                     }
-                    vrstva1.push_back(mezivrst);
-                    mezivrst.clear();
                 }
-                
+
+
+                for(int i = 0; i<5;i++){
+                    for(int j = 0; j<16;j++){
+                        konvo = 0.0;
+                        for(int k = 0; k<15;k++){
+                            konvo += kernely_1Dreal_1.getElement(i,k) * R_val_vstup[kroky +j+k];
+                        }
+                        konvo+=bias_1Dreal_1[i];
+                        if(konvo<0.0){
+                            vrstva1.setElement(5+i,j,(konvo * 0.01));
+                        }else{
+                            vrstva1.setElement(5+i,j,konvo);
+                        }
+                    }
+                }
+
 
                 for(int i = 0; i<2;i++){
                     for(int j = 0; j<10; j++){
                         for(int k = 0;k<7;k++){
-                            double konvo = 0.0;
+                            konvo = 0.0;
                             for(int l = 0; l<10;l++){
-                                konvo+=kernely_1Dreal_2[i][l]*vrstva1[j][k+l];
+                                konvo+=kernely_1Dreal_2.getElement(i,l)*vrstva1.getElement(j,k+l);
                             }
                             konvo+=bias_1Dreal_2[i];
                             if(konvo<0.0){
-                                mezivrst.push_back(konvo * 0.01);
+                                vrstva2.setElement((i*10+j),k,(konvo * 0.01));
                             }else{
-                                mezivrst.push_back(konvo);
+                                vrstva2.setElement((i*10+j),k,konvo);
                             }
                         }
-                        vrstva2.push_back(mezivrst);
-                        mezivrst.clear();
                     }
                 }
 
                 for(int i = 0; i<2;i++){
                     for(int j = 0; j<20; j++){
-                            double konvo = 0.0;
+                            konvo = 0.0;
                             for(int l = 0; l<7;l++){
-                                konvo+=kernely_1Dreal_3[i][l]*vrstva2[j][l];
+                                konvo+=kernely_1Dreal_3.getElement(i,l) * vrstva2.getElement(j,l);
                             }
                             konvo+=bias_1Dreal_3[i];
                             if(konvo<0.0){
@@ -3348,85 +3303,75 @@ void NN::cnn1Dreal_val(int velic){
         }
             for(int kroky = 0; kroky < (Q_val_vstup.size() - 30); kroky++){
                 vystzkonv.clear();
-                vrstva1.clear();
-                vrstva2.clear();
-
-                std::vector<double>mezivrst;
+                vrstva1.resize(15,16);
+                vrstva2.resize(30,7);
                 for(int i = 0; i<5;i++){
                     for(int j = 0; j<16;j++){
-                        double konvo = 0.0;
+                        konvo = 0.0;
                         for(int k = 0; k<15;k++){
-                            konvo += kernely_1Dreal_1[i][k] * Q_val_vstup[kroky +j+k];
+                            konvo += kernely_1Dreal_1.getElement(i,k) * Q_val_vstup[kroky +j+k];
                         }
                         konvo+=bias_1Dreal_1[i];
                         if(konvo<0.0){
-                            mezivrst.push_back(konvo * 0.01);
+                            vrstva1.setElement(i,j,(konvo * 0.01));
                         }else{
-                            mezivrst.push_back(konvo);
+                            vrstva1.setElement(i,j,konvo);
                         }
                     }
-                    vrstva1.push_back(mezivrst);
-                    mezivrst.clear();
                 }
 
                 for(int i = 0; i<5;i++){
                     for(int j = 0; j<16;j++){
-                        double konvo = 0.0;
+                        konvo = 0.0;
                         for(int k = 0; k<15;k++){
-                            konvo += kernely_1Dreal_1[i][k] * R_val_vstup[kroky +j+k];
+                            konvo += kernely_1Dreal_1.getElement(i,k) * R_val_vstup[kroky +j+k];
                         }
                         konvo+=bias_1Dreal_1[i];
                         if(konvo<0.0){
-                            mezivrst.push_back(konvo * 0.01);
+                            vrstva1.setElement(5+i,j,(konvo * 0.01));
                         }else{
-                            mezivrst.push_back(konvo);
+                            vrstva1.setElement(5+i,j,konvo);
                         }
                     }
-                    vrstva1.push_back(mezivrst);
-                    mezivrst.clear();
                 }
 
                 for(int i = 0; i<5;i++){
                     for(int j = 0; j<16;j++){
-                        double konvo = 0.0;
+                        konvo = 0.0;
                         for(int k = 0; k<15;k++){
-                            konvo += kernely_1Dreal_1[i][k] * T_val_vstup[kroky +j+k];
+                            konvo += kernely_1Dreal_1.getElement(i,k) * T_val_vstup[kroky +j+k];
                         }
                         konvo+=bias_1Dreal_1[i];
                         if(konvo<0.0){
-                            mezivrst.push_back(konvo * 0.01);
+                            vrstva1.setElement(10+i,j,(konvo * 0.01));
                         }else{
-                            mezivrst.push_back(konvo);
+                            vrstva1.setElement(10+i,j,konvo);
                         }
                     }
-                    vrstva1.push_back(mezivrst);
-                    mezivrst.clear();
                 }
 
                 for(int i = 0; i<2;i++){
                     for(int j = 0; j<15; j++){
                         for(int k = 0;k<7;k++){
-                            double konvo = 0.0;
+                            konvo = 0.0;
                             for(int l = 0; l<10;l++){
-                                konvo+=kernely_1Dreal_2[i][l]*vrstva1[j][k+l];
+                                konvo+=kernely_1Dreal_2.getElement(i,l)*vrstva1.getElement(j,k+l);
                             }
                             konvo+=bias_1Dreal_2[i];
                             if(konvo<0.0){
-                                mezivrst.push_back(konvo * 0.01);
+                                vrstva2.setElement((i*15+j),k,(konvo * 0.01));
                             }else{
-                                mezivrst.push_back(konvo);
+                                vrstva2.setElement((i*15+j),k,konvo);
                             }
                         }
-                        vrstva2.push_back(mezivrst);
-                        mezivrst.clear();
                     }
                 }
 
                 for(int i = 0; i<2;i++){
                     for(int j = 0; j<30; j++){
-                            double konvo = 0.0;
+                            konvo = 0.0;
                             for(int l = 0; l<7;l++){
-                                konvo+=kernely_1Dreal_3[i][l]*vrstva2[j][l];
+                                konvo+=kernely_1Dreal_3.getElement(i,l) * vrstva2.getElement(j,l);
                             }
                             konvo+=bias_1Dreal_3[i];
                             if(konvo<0.0){
@@ -3460,9 +3405,9 @@ void NN::cnn1Dreal_val(int velic){
         }
     }
 
-double NN::random(double min, double max){
+double NN::random(double mean, double sd){
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::normal_distribution<> dis(min,max);
+    std::normal_distribution<> dis(mean,sd);
     return dis(gen);
 }

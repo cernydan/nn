@@ -876,10 +876,10 @@ output_folder <- "D:/pokusydip/"
 x = 1
 vysl = data.frame()
 vysl_cr = list()
-for(pokus in 1){
+for(pokus in 1:5){
   for(l in 2:3){
-    for(k in 1000){
-      for(j in c(50)){
+    for(k in 5475){
+      for(j in c(100)){
         for(i in 1:5){
           iter = j
           velic = l
@@ -887,20 +887,20 @@ for(pokus in 1){
           mlp <- udelej_nn()
           nn_init_nn(mlp,(20*l),c(20,20,1))
           nn_set_vstup_rady(mlp, povodi[[i]]$Q[1:k],
-                            povodi[[i]]$Q[(k+1):12000], 
+                            povodi[[i]]$Q[(k+1):length(povodi[[i]]$Q)], 
                             povodi[[i]]$R[1:k],
-                            povodi[[i]]$R[(k+1):12000], 
+                            povodi[[i]]$R[(k+1):length(povodi[[i]]$R)], 
                             povodi[[i]]$Tmax[1:k],
-                            povodi[[i]]$Tmax[(k+1):12000]
+                            povodi[[i]]$Tmax[(k+1):length(povodi[[i]]$Tmax)]
           )
-          nn_cnn_full_cal(mlp,iter,velic)
-          nn_cnn_full_val(mlp,velic)
+          nn_cnn_1dreal_cal(mlp,iter,velic)
+          nn_cnn_1dreal_val(mlp,velic)
           vystupy <- nn_get_vystupy(mlp)
           
           # Vytvoření datového rámce pro ggplot
           df_plot <- data.frame(
-            Datum = povodi[[i]]$Datum[(k+31):12000],
-            Q_měřené = povodi[[i]]$Q[(k+31):12000]*minmax[i,2]+minmax[i,1],
+            Datum = povodi[[i]]$Datum[(k+31):length(povodi[[i]]$Q)],
+            Q_měřené = povodi[[i]]$Q[(k+31):length(povodi[[i]]$Q)]*minmax[i,2]+minmax[i,1],
             Q_modelované = vystupy*minmax[i,2]+minmax[i,1]
           )
           

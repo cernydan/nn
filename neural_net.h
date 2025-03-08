@@ -72,9 +72,9 @@ public:
     void cnnonfly_val(int velic);
     void cnn1Dreal_cal(int iter, int velic);
     void cnn1Dreal_val(int velic);
-    std::vector<std::vector<double>> kernely_1Dreal_1;
-    std::vector<std::vector<double>> kernely_1Dreal_2;
-    std::vector<std::vector<double>> kernely_1Dreal_3;
+    Matice<double> kernely_1Dreal_1;
+    Matice<double> kernely_1Dreal_2;
+    Matice<double> kernely_1Dreal_3;
     std::vector<double> bias_1Dreal_1;
     std::vector<double> bias_1Dreal_2;
     std::vector<double> bias_1Dreal_3;

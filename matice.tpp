@@ -116,7 +116,7 @@ size_t Matice<T>::getCols() const {
 template<typename T>
 T Matice<T>::getElement(size_t row, size_t col) {
     if (row >= rows || col >= cols) {
-        std::cout<<"index mimo rozmery matice";
+        std::cout<<"GET index mimo rozmery matice"<<rows<<cols;
         exit(0);
     }
     return dta[row][col];
@@ -125,7 +125,7 @@ T Matice<T>::getElement(size_t row, size_t col) {
 template<typename T>
 void Matice<T>::setElement(size_t row, size_t col, T value) {
     if (row >= rows || col >= cols) {
-        std::cout<<"index mimo rozmery matice";
+        std::cout<<"SET index mimo rozmery matice"<<rows<<cols;
         exit(0);
     }
     dta[row][col] = value;
@@ -204,10 +204,10 @@ void Matice<T>::shuffle_radkyavec(std::vector<T>& vec) {
 }
 
 template<typename T>
-void Matice<T>::rand_vypln(double min, double max){
+void Matice<T>::rand_vypln(double mean, double sd){
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::normal_distribution<> dis(min,max);
+    std::normal_distribution<> dis(mean,sd);
     for (int i = 0;i<rows;i++){
         for (int j = 0;j<cols;j++){
             dta[i][j] = dis(gen);
@@ -288,4 +288,29 @@ void Matice<T>::sloupce_nakonec(size_t pocet_sloupcu) {
     // Aktualizovat ukazatel, počet sloupců a přidělená data
     dta = new_dta;
     cols = new_cols;
+}
+
+
+template<typename T>
+void Matice<T>::flip_cols_and_pad(size_t pad) {
+    // Nové pole pro data
+    T** new_dta = new T*[rows];
+
+    for (size_t i = 0; i < rows; ++i) {
+        new_dta[i] = new T[cols + 2 * pad](); // Inicializace s nulami
+        // Zrcadlové otočení sloupců s posunutím
+        for (size_t j = 0; j < cols; ++j) {
+            new_dta[i][pad + j] = dta[i][cols - 1 - j];
+        }
+    }
+
+    // Uvolnění staré paměti
+    for (size_t i = 0; i < rows; ++i) {
+        delete[] dta[i];
+    }
+    delete[] dta;
+
+    // Aktualizace ukazatele a velikosti matice
+    dta = new_dta;
+    cols += 2 * pad;
 }
